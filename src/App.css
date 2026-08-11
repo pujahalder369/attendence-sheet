@@ -1,0 +1,41 @@
+button {
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+button:hover {
+    background-color:#e1de13;
+    box-shadow: 0px 0px 10px #e1de13;
+}
+
+.custom-scrollbar {
+  height: calc(100vh - 40px);
+  scrollbar-width: thin;
+  scrollbar-color: #38bdf8 #f1f5f9;
+}
+
+/* Chrome, Edge, Safari */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #38bdf8;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #0284c7;
+}
+
+.left_box {
+  border: 2px solid rgb(174, 174, 174);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 15px;
+}

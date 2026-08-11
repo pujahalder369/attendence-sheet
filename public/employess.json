@@ -1,0 +1,32 @@
+{
+    "employees": [
+        {
+            "id": 1,
+            "first_name": "Shubham",
+            "last_name": "Kushwaha",
+            "designation": "sales",
+            "department_name": "Sales"
+        },
+        {
+            "id": 2,
+            "first_name": "Manisha",
+            "last_name": "Saini",
+            "designation": "sales",
+            "department_name": "Sales"
+        },
+        {
+            "id": 3,
+            "first_name": "Ashok",
+            "last_name": "Kirodiwal",
+            "designation": "Service Manager",
+            "department_name": "Sales"
+        },
+        {
+            "id": 4,
+            "first_name": "Ajay ",
+            "last_name": "Singh Rajpoot ",
+            "designation": "Employee ",
+            "department_name": "Sales"
+        }
+    ]
+}
