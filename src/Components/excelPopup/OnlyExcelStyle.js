@@ -1,159 +1,113 @@
 import * as XLSX from "xlsx-js-style";
 
-// =====================================================
+export const COLORS = {
+  header: "17365D",
+  dayHeader: "2F75B5",
+
+  white: "FFFFFF",
+  black: "000000",
+
+  border: "D9E1F2",
+
+  employeeEven: "F8FAFC",
+  employeeOdd: "EEF4FB",
+
+  present: "C6EFCE",
+  absent: "FFC7CE",
+  leave: "FFEB9C",
+  halfDay: "F4B183",
+  holiday: "9DC3E6",
+  weekOff: "D9D9D9",
+};
+
+
 // BORDER
-// =====================================================
+
 
 export const borderStyle = {
   top: {
     style: "thin",
-    color: { rgb: "000000" },
+    color: {
+      rgb: COLORS.border,
+    },
   },
+
   bottom: {
     style: "thin",
-    color: { rgb: "000000" },
+    color: {
+      rgb: COLORS.border,
+    },
   },
+
   left: {
     style: "thin",
-    color: { rgb: "000000" },
+    color: {
+      rgb: COLORS.border,
+    },
   },
+
   right: {
     style: "thin",
-    color: { rgb: "000000" },
+    color: {
+      rgb: COLORS.border,
+    },
   },
 };
 
-// =====================================================
-// CENTER
-// =====================================================
 
-const centerAlignment = {
+// CENTER ALIGNMENT
+
+
+export const centerAlignment = {
   horizontal: "center",
   vertical: "center",
   wrapText: true,
 };
 
-// =====================================================
-// GENERAL BORDER
-// =====================================================
 
-export const applyBorderToAllCells = (worksheet) => {
-  Object.keys(worksheet).forEach((cellAddress) => {
-    if (cellAddress.startsWith("!")) return;
+// GENERAL STYLE
 
-    const cell = worksheet[cellAddress];
 
-    if (!cell) return;
+export const applyGeneralStyle = (worksheet, totalRows, totalColumns) => {
+  for (let row = 0; row < totalRows; row++) {
+    for (let col = 0; col < totalColumns; col++) {
+      const cellAddress = XLSX.utils.encode_cell({
+        r: row,
+        c: col,
+      });
 
-    cell.s = {
-      ...(cell.s || {}),
+      const cell = worksheet[cellAddress];
 
-      border: {
-        ...borderStyle,
-      },
+      if (!cell) continue;
 
-      alignment: {
-        ...(cell.s?.alignment || {}),
-        ...centerAlignment,
-      },
-    };
-  });
-};
-
-// =====================================================
-// EMPLOYEE HEADER
-// =====================================================
-
-export const applyEmployeeHeaderStyle = (worksheet) => {
-  for (let row = 0; row <= 3; row++) {
-    const cellAddress = XLSX.utils.encode_cell({
-      r: row,
-      c: 0,
-    });
-
-    const cell = worksheet[cellAddress];
-
-    if (!cell) continue;
-
-    cell.s = {
-      font: {
-        bold: true,
-        sz: 11,
-        color: {
-          rgb: "000000",
+      cell.s = {
+        font: {
+          sz: 10,
+          color: {
+            rgb: COLORS.black,
+          },
         },
-      },
 
-      alignment: {
-        horizontal: "left",
-        vertical: "center",
-      },
+        alignment: {
+          ...centerAlignment,
+        },
 
-      border: {
-        ...borderStyle,
-      },
-    };
+        border: {
+          ...borderStyle,
+        },
+      };
+    }
   }
 };
 
-// =====================================================
-// SUMMARY HEADER
-// =====================================================
 
-export const applyHeaderStyle = (
-  worksheet,
-  row,
-  totalColumns
-) => {
+// HEADER STYLE
+
+
+export const applyHeaderStyle = (worksheet, totalColumns) => {
   for (let col = 0; col < totalColumns; col++) {
     const cellAddress = XLSX.utils.encode_cell({
-      r: row,
-      c: col,
-    });
-
-    const cell = worksheet[cellAddress];
-
-    if (!cell) continue;
-
-    cell.s = {
-      font: {
-        bold: true,
-        color: {
-          rgb: "FFFFFF",
-        },
-        sz: 10,
-      },
-
-      fill: {
-        patternType: "solid",
-        fgColor: {
-          rgb: "404040",
-        },
-      },
-
-      alignment: {
-        ...centerAlignment,
-      },
-
-      border: {
-        ...borderStyle,
-      },
-    };
-  }
-};
-
-// =====================================================
-// SUMMARY DATA
-// =====================================================
-
-export const applySummaryDataStyle = (
-  worksheet,
-  row,
-  totalColumns
-) => {
-  for (let col = 0; col < totalColumns; col++) {
-    const cellAddress = XLSX.utils.encode_cell({
-      r: row,
+      r: 0,
       c: col,
     });
 
@@ -166,7 +120,14 @@ export const applySummaryDataStyle = (
         bold: true,
         sz: 10,
         color: {
-          rgb: "000000",
+          rgb: COLORS.white,
+        },
+      },
+
+      fill: {
+        patternType: "solid",
+        fgColor: {
+          rgb: col < 10 ? COLORS.header : COLORS.dayHeader,
         },
       },
 
@@ -181,157 +142,314 @@ export const applySummaryDataStyle = (
   }
 };
 
-// =====================================================
-// DAY HEADER
-// =====================================================
 
-export const applyDayHeaderStyle = (
-  worksheet,
-  row,
-  totalColumns
-) => {
-  for (let col = 0; col < totalColumns; col++) {
-    const cellAddress = XLSX.utils.encode_cell({
-      r: row,
-      c: col,
-    });
+// EMPLOYEE STYLE
 
-    const cell = worksheet[cellAddress];
 
-    if (!cell) continue;
+export const applyEmployeeStyle = (worksheet, totalRows) => {
+  for (let row = 1; row < totalRows; row++) {
+    for (let col = 0; col < 4; col++) {
+      const cellAddress = XLSX.utils.encode_cell({
+        r: row,
+        c: col,
+      });
 
-    cell.s = {
-      font: {
-        bold: true,
-        color: {
-          rgb: "FFFFFF",
+      const cell = worksheet[cellAddress];
+
+      if (!cell) continue;
+
+      cell.s = {
+        font: {
+          bold: true,
+          sz: 10,
+          color: {
+            rgb: COLORS.black,
+          },
         },
-        sz: 10,
-      },
 
-      fill: {
-        patternType: "solid",
-        fgColor: {
-          rgb: "5B9BD5",
+        fill: {
+          patternType: "solid",
+
+          fgColor: {
+            rgb: row % 2 === 0 ? COLORS.employeeEven : COLORS.employeeOdd,
+          },
         },
-      },
 
-      alignment: {
-        ...centerAlignment,
-      },
+        alignment: {
+          horizontal: col === 0 ? "center" : "left",
 
-      border: {
-        ...borderStyle,
-      },
-    };
+          vertical: "center",
+
+          wrapText: true,
+        },
+
+        border: {
+          ...borderStyle,
+        },
+      };
+    }
   }
 };
 
-// =====================================================
-// LABEL STYLE
-// =====================================================
 
-export const applyLabelStyle = (
-  worksheet,
-  rows
-) => {
-  rows.forEach((row) => {
-    const cellAddress = XLSX.utils.encode_cell({
-      r: row,
-      c: 0,
+// SUMMARY STYLE
+
+
+export const applySummaryStyle = (worksheet, totalRows) => {
+  const summaryColors = {
+    4: COLORS.present,
+    5: COLORS.absent,
+    6: COLORS.leave,
+    7: COLORS.halfDay,
+    8: COLORS.holiday,
+    9: COLORS.weekOff,
+  };
+
+  for (let row = 1; row < totalRows; row++) {
+    Object.entries(summaryColors).forEach(([column, background]) => {
+      const cellAddress = XLSX.utils.encode_cell({
+        r: row,
+        c: Number(column),
+      });
+
+      const cell = worksheet[cellAddress];
+
+      if (!cell) return;
+
+      cell.s = {
+        font: {
+          bold: true,
+          sz: 10,
+          color: {
+            rgb: COLORS.black,
+          },
+        },
+
+        fill: {
+          patternType: "solid",
+
+          fgColor: {
+            rgb: background,
+          },
+        },
+
+        alignment: {
+          ...centerAlignment,
+        },
+
+        border: {
+          ...borderStyle,
+        },
+      };
     });
-
-    const cell = worksheet[cellAddress];
-
-    if (!cell) return;
-
-    cell.s = {
-      font: {
-        bold: true,
-        sz: 10,
-        color: {
-          rgb: "000000",
-        },
-      },
-
-      fill: {
-        patternType: "solid",
-        fgColor: {
-          rgb: "D9EAF7",
-        },
-      },
-
-      alignment: {
-        horizontal: "left",
-        vertical: "center",
-      },
-
-      border: {
-        ...borderStyle,
-      },
-    };
-  });
+  }
 };
 
-// =====================================================
-// STATUS COLORS
-// =====================================================
 
-const statusColors = {
-  P: "C6EFCE",   // Present
-  A: "FFC7CE",   // Absent
-  L: "FFEB9C",   // Leave
-  HD: "F4B183",  // Half Day
-  HO: "9DC3E6",  // Holiday
-  WO: "D9D9D9",  // Week Off
+// DAY STYLE
+
+
+export const applyDayStyle = (worksheet, totalRows) => {
+  for (let row = 1; row < totalRows; row++) {
+    for (let col = 10; col < 41; col++) {
+      const cellAddress = XLSX.utils.encode_cell({
+        r: row,
+        c: col,
+      });
+
+      const cell = worksheet[cellAddress];
+
+      if (!cell) continue;
+
+      cell.s = {
+        font: {
+          bold: true,
+          sz: 10,
+          color: {
+            rgb: COLORS.black,
+          },
+        },
+
+        fill: {
+          patternType: "solid",
+
+          fgColor: {
+            rgb: row % 2 === 0 ? "F9FBFD" : COLORS.white,
+          },
+        },
+
+        alignment: {
+          ...centerAlignment,
+        },
+
+        border: {
+          ...borderStyle,
+        },
+      };
+    }
+  }
 };
 
-// =====================================================
+
 // STATUS STYLE
-// =====================================================
 
-export const applyStatusStyle = (
-  worksheet,
-  statusRow
-) => {
-  for (let col = 1; col <= 31; col++) {
-    const cellAddress = XLSX.utils.encode_cell({
-      r: statusRow,
-      c: col,
+
+export const applyStatusStyle = (worksheet, totalRows) => {
+  const statusColors = {
+    P: {
+      background: COLORS.present,
+      text: "38761D",
+    },
+
+    A: {
+      background: COLORS.absent,
+      text: "990000",
+    },
+
+    L: {
+      background: COLORS.leave,
+      text: "7F6000",
+    },
+
+    HD: {
+      background: COLORS.halfDay,
+      text: "C65911",
+    },
+
+    HO: {
+      background: COLORS.holiday,
+      text: "1F4E78",
+    },
+
+    WO: {
+      background: COLORS.weekOff,
+      text: "666666",
+    },
+  };
+
+  for (let row = 1; row < totalRows; row++) {
+    for (let col = 10; col < 41; col++) {
+      const cellAddress = XLSX.utils.encode_cell({
+        r: row,
+        c: col,
+      });
+
+      const cell = worksheet[cellAddress];
+
+      if (!cell) continue;
+
+      const status = cell.v;
+
+      const style = statusColors[status];
+
+      if (!style) continue;
+
+      cell.s = {
+        font: {
+          bold: true,
+          sz: 10,
+
+          color: {
+            rgb: style.text,
+          },
+        },
+
+        fill: {
+          patternType: "solid",
+
+          fgColor: {
+            rgb: style.background,
+          },
+        },
+
+        alignment: {
+          ...centerAlignment,
+        },
+
+        border: {
+          ...borderStyle,
+        },
+      };
+    }
+  }
+};
+
+
+// COLUMN WIDTH
+
+
+export const applyColumnWidth = (worksheet, header, rows) => {
+  const columnWidths = [];
+
+  for (let col = 0; col < header.length; col++) {
+    let maxLength = String(header[col]).length;
+
+    rows.forEach((row) => {
+      const value = row[col];
+
+      if (value !== undefined && value !== null) {
+        maxLength = Math.max(maxLength, String(value).length);
+      }
     });
 
-    const cell = worksheet[cellAddress];
+    let width;
 
-    if (!cell) continue;
+    // EmpCode
+    if (col === 0) {
+      width = 12;
+    }
 
-    const status = cell.v;
+    // Name
+    else if (col === 1) {
+      width = 22;
+    }
 
-    const background =
-      statusColors[status] || "FFFFFF";
+    // Department
+    else if (col === 2) {
+      width = 20;
+    }
 
-    cell.s = {
-      font: {
-        bold: true,
-        sz: 10,
-        color: {
-          rgb: "000000",
-        },
-      },
+    // Designation
+    else if (col === 3) {
+      width = 20;
+    }
 
-      fill: {
-        patternType: "solid",
-        fgColor: {
-          rgb: background,
-        },
-      },
+    // Summary
+    else if (col >= 4 && col <= 9) {
+      width = 11;
+    }
 
-      alignment: {
-        ...centerAlignment,
-      },
+    // Day 1 - Day 31
+    else {
+      width = 10;
+    }
 
-      border: {
-        ...borderStyle,
-      },
-    };
+    width = Math.max(width, Math.min(maxLength + 2, 20));
+
+    columnWidths.push({
+      wch: width,
+    });
+  }
+
+  worksheet["!cols"] = columnWidths;
+};
+
+
+// ROW HEIGHT
+
+
+export const applyRowHeight = (worksheet, totalRows) => {
+  worksheet["!rows"] = [];
+
+  // Header
+  worksheet["!rows"].push({
+    hpt: 32,
+  });
+
+  // Employee rows
+  for (let row = 1; row < totalRows; row++) {
+    worksheet["!rows"].push({
+      hpt: 24,
+    });
   }
 };
