@@ -1,319 +1,172 @@
-import * as XLSX from "xlsx-js-style";
-import {
-  getStatus,
-  formatDuration,
-} from "../AttendencePDF/pdfHelper";
-import {
-  applyBorderToAllCells,
-  applyEmployeeHeaderStyle,
-  applyHeaderStyle,
-  applyStatusStyle,
-} from "./ExcelStyle";
-
-export const downloadExcel = (selectedData) => {
-  const workbook = XLSX.utils.book_new();
-
-  selectedData.forEach(
-    (empData, employeeIndex) => {
-      const employee = empData?.employee;
-
-      const attendances =
-        empData?.attendances ?? [];
-
-      const rows = [];
-
-      // EMPLOYEE INFORMATION
-
-      rows.push([
-        `EmpCode : ${employee?.id ?? "---"}`,
-      ]);
-
-      rows.push([
-        `Name : ${employee?.first_name ?? "---"} ${
-          employee?.last_name ?? "---"
-        }`,
-      ]);
-
-      rows.push([
-        `Department : ${
-          employee?.department_name || "---"
-        }`,
-      ]);
-
-      rows.push([
-        `Designation : ${
-          employee?.designation || "---"
-        }`,
-      ]);
-
-      rows.push([]);
-
-      const statusList = attendances.map((att) =>
-        getStatus(att)
-      );
-
-      const present = statusList.filter(
-        (status) => status === "P"
-      ).length;
-
-      const absent = statusList.filter(
-        (status) => status === "A"
-      ).length;
-
-      const leave = statusList.filter(
-        (status) => status === "L"
-      ).length;
-
-      const halfDay = statusList.filter(
-        (status) => status === "HD"
-      ).length;
-
-      const holiday = statusList.filter(
-        (status) => status === "HO"
-      ).length;
-
-      const weekOff = statusList.filter(
-        (status) => status === "WO"
-      ).length;
-
-      rows.push([
-        "EmpCode",
-        "Name",
-        "Present",
-        "Absent",
-        "Leave",
-        "Halfday",
-        "Holiday",
-        "WeekOff",
-      ]);
-
-      rows.push([
-        employee?.id ?? "---",
-
-        `${employee?.first_name ?? "---"} ${
-          employee?.last_name ?? "---"
-        }`,
-
-        present,
-        absent,
-        leave,
-        halfDay,
-        holiday,
-        weekOff,
-      ]);
-
-      rows.push([]);
-
-      // DAY HEADER
-
-      rows.push([
-        "Label",
-
-        ...Array.from(
-          { length: 31 },
-          (_, index) => index + 1
-        ),
-      ]);
-
-      // IN TIME
-
-      rows.push([
-        "IN Time",
-
-        ...Array.from(
-          { length: 31 },
-          (_, index) => {
-            const att = attendances[index];
-
-            return (
-              att?.in_formatted_time || "-"
-            );
-          }
-        ),
-      ]);
-
-      // OUT TIME
-
-      rows.push([
-        "OUT Time",
-
-        ...Array.from(
-          { length: 31 },
-          (_, index) => {
-            const att = attendances[index];
-
-            return (
-              att?.out_formatted_time || "-"
-            );
-          }
-        ),
-      ]);
-
-      // WORKING
-
-      rows.push([
-        "Working",
-
-        ...Array.from(
-          { length: 31 },
-          (_, index) => {
-            const att = attendances[index];
-
-            return att
-              ? formatDuration(
-                  att?.duration || 0
-                )
-              : "-";
-          }
-        ),
-      ]);
-
-      // O.Times
-
-      rows.push([
-        "O.Times",
-
-        ...Array.from(
-          { length: 31 },
-          (_, index) => {
-            const att = attendances[index];
-
-            return att
-              ? formatDuration(
-                  att?.ot || 0
-                )
-              : "-";
-          }
-        ),
-      ]);
-
-      // STATUS
-
-      rows.push([
-        "Status",
-
-        ...Array.from(
-          { length: 31 },
-          (_, index) => {
-            const att = attendances[index];
-
-            return att
-              ? getStatus(att)
-              : "-";
-          }
-        ),
-      ]);
-
-      // CREATE WORKSHEET
-
-      const worksheet =
-        XLSX.utils.aoa_to_sheet(rows);
-
-      // COLUMN WIDTH
-
-      worksheet["!cols"] = [
-        { wch: 18 },
-
-        ...Array.from(
-          { length: 31 },
-          () => ({
-            wch: 12,
-          })
-        ),
-      ];
-
-      // MERGE EMPLOYEE HEADER
-
-      worksheet["!merges"] = [
-        {
-          s: { r: 0, c: 0 },
-          e: { r: 0, c: 31 },
-        },
-        {
-          s: { r: 1, c: 0 },
-          e: { r: 1, c: 31 },
-        },
-        {
-          s: { r: 2, c: 0 },
-          e: { r: 2, c: 31 },
-        },
-        {
-          s: { r: 3, c: 0 },
-          e: { r: 3, c: 31 },
-        },
-      ];
-
-      // GENERAL STYLE
-
-      applyBorderToAllCells(worksheet);
-
-      // EMPLOYEE HEADER
-
-      applyEmployeeHeaderStyle(
-        worksheet
-      );
-
-      // SUMMARY HEADER
-
-      applyHeaderStyle(
-        worksheet,
-        5,
-        8
-      );
-
-      // DAY HEADER
-
-      applyHeaderStyle(
-        worksheet,
-        7,
-        32
-      );
-
-      // STATUS COLORS
-
-      const statusRow =
-        rows.length - 1;
-
-      applyStatusStyle(
-        worksheet,
-        statusRow
-      );
-
-      // SHEET NAME
-
-      let sheetName =
-        `${employee?.first_name ?? "Employee"}`
-          .replace(/[\\/?*[\]:]/g, "")
-          .substring(0, 25);
-
-      if (!sheetName) {
-        sheetName = `Employee${
-          employeeIndex + 1
-        }`;
-      }
-
-      if (
-        workbook.SheetNames.includes(
-          sheetName
-        )
-      ) {
-        sheetName =
-          `${sheetName}_${employeeIndex + 1}`
-            .substring(0, 31);
-      }
-
-      XLSX.utils.book_append_sheet(
-        workbook,
-        worksheet,
-        sheetName
-      );
+import { useEffect, useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { downloadOnlyExcel } from "./OnlyExcel";
+
+const ExcelPopup = ({ closePopup }) => {
+  const [attendanceData, setAttendanceData] = useState({
+    results: [],
+  });
+
+  const [selectedEmployees, setSelectedEmployees] = useState([]);
+
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() => {
+    fetch("/data.json")
+      .then((res) => res.json())
+      .then((json) => {
+        setAttendanceData(json);
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.error("Failed to load attendance data");
+      });
+  }, []);
+
+  // SELECT EMPLOYEE
+  const handleCheckboxChange = (id) => {
+    setSelectedEmployees((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
+  };
+
+  // SELECT ALL
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      const allEmployeeIds = attendanceData.results
+        .map((entry) => entry?.employee?.id)
+        .filter(Boolean);
+
+      setSelectedEmployees(allEmployeeIds);
+    } else {
+      setSelectedEmployees([]);
     }
-  );
+  };
 
-  // DOWNLOAD
+  // DOWNLOAD EXCEL
+  const handleDownload = async () => {
+    const selectedData = attendanceData.results.filter((entry) =>
+      selectedEmployees.includes(entry?.employee?.id),
+    );
 
-  XLSX.writeFile(
-    workbook,
-    "attendance-report.xlsx"
+    if (selectedData.length === 0) {
+      toast.error("Please select at least one employee.");
+      return;
+    }
+
+    setIsGenerating(true);
+
+    const loading = toast.loading("Generating Excel...");
+
+    try {
+      downloadOnlyExcel(selectedData);
+
+      toast.dismiss(loading);
+
+      toast.success("Excel downloaded successfully!");
+    } catch (error) {
+      console.error(error);
+
+      toast.dismiss(loading);
+
+      toast.error("Failed to generate Excel.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  return (
+    <>
+      <Toaster position="top-right" />
+
+      <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+        <div className="bg-white p-6 rounded-lg w-[500px]">
+          <div className="mb-5 grid grid-cols-2 gap-4">
+            {/* EMPLOYEES */}
+
+            <div>
+              <h2 className="font-semibold text-lg mb-3">Employees</h2>
+
+              <div className="left_box flex flex-col gap-2">
+                {attendanceData.results.map((entry) => {
+                  const emp = entry?.employee;
+
+                  const employeeId = emp?.id;
+
+                  return (
+                    <label
+                      key={employeeId}
+                      htmlFor={`emp-${employeeId}`}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        id={`emp-${employeeId}`}
+                        checked={selectedEmployees.includes(employeeId)}
+                        onChange={() => handleCheckboxChange(employeeId)}
+                        className="w-4 h-4"
+                      />
+
+                      <span>
+                        {emp?.first_name} {emp?.last_name}
+                      </span>
+                    </label>
+                  );
+                })}
+                <label
+                  htmlFor="select-all"
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    id="select-all"
+                    checked={
+                      attendanceData.results.length > 0 &&
+                      selectedEmployees.length === attendanceData.results.length
+                    }
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    className="w-4 h-4"
+                  />
+
+                  <span>Select All</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <h2 className="font-semibold text-lg mb-3">Export In</h2>
+
+              <div className="left_box">
+                <label className="flex items-center gap-2">
+                  <input type="radio" checked readOnly className="h-4 w-4" />
+
+                  <span>Excel</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={handleDownload}
+              disabled={isGenerating}
+              className="bg-[#EDEB62] p-2 rounded-lg w-full font-semibold disabled:opacity-70"
+            >
+              {isGenerating ? "Generating..." : "Download Excel"}
+            </button>
+
+            <button
+              onClick={closePopup}
+              disabled={isGenerating}
+              className="bg-[#EDEB62] p-2 rounded-lg w-full font-semibold"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
+
+export default ExcelPopup;

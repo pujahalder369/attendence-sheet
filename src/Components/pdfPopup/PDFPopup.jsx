@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { pdf } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
 import toast, { Toaster } from "react-hot-toast";
-import { downloadExcel } from "../excelPopup/ExcelPopup";
+import { downloadExcel } from "../excelPopup/ExcelDownload";
 import AttendancePDF from "../AttendencePDF/AttendancePDF";
 
 const PDFPopup = ({ closePopup }) => {
@@ -84,8 +84,8 @@ const PDFPopup = ({ closePopup }) => {
     }
   };
 
-  const handleSelectAll = (check) => {
-    if (check) {
+  const handleSelectAll = (checked) => {
+    if (checked) {
       const allEmployeeIds = 
       attendanceData.results.map((entry) => entry?.employee?.id).filter(Boolean);
       setSelectedEmployees(allEmployeeIds);
@@ -100,9 +100,6 @@ const PDFPopup = ({ closePopup }) => {
 
       <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
         <div className="bg-white p-6 rounded-lg w-[500px]">
-          {/* =========================
-              EMPLOYEES + EXPORT
-          ========================= */}
           <div className="mb-5 grid grid-cols-2 gap-4">
             {/* EMPLOYEES */}
             <div>

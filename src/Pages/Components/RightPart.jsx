@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import PDFPopup from '../../Components/pdfPopup/PDFPopup';
+import ExcelPopup from '../../Components/excelPopup/ExcelPopup';
 
 const RightPart = () => {
     const [pdfPopup, setPdfPopup] = useState(false);
+    const [excelPopup, setExcelPopup] = useState(false);
 
     return (
         <div>
@@ -19,7 +21,15 @@ const RightPart = () => {
                     >
                         Report 1
                     </button>
+                    <button
+                        onClick={() => setExcelPopup(true)}
+                        type="button"
+                        className="bg-[#EDEB62] p-3 px-12 text-xl rounded-lg inline-flex lg:w-full justify-center font-semibold"
+                    >
+                        Report 2
+                    </button>
                     {pdfPopup && <PDFPopup closePopup={() => setPdfPopup(false)} />}
+                    {excelPopup && <ExcelPopup closePopup={() => setExcelPopup(false)} />}
                 </div>
             </div>
         </div>

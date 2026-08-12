@@ -68,22 +68,22 @@ const AttendancePDF = ({
 
                             <View style={styles.header}>
                                 <Text style={styles.headerText}>
-                                    EmpCode : {emp?.employee?.id ?? "N/A"}
+                                    EmpCode : {emp?.employee?.id ?? "---"}
                                 </Text>
 
                                 <Text style={styles.employeeName}>
-                                    Name : {emp?.employee?.first_name ?? ""}{" "}
-                                    {emp?.employee?.last_name ?? ""}
+                                    Name : {emp?.employee?.first_name ?? "---"}{" "}
+                                    {emp?.employee?.last_name ?? "---"}
                                 </Text>
 
                                 <Text style={styles.headerText}>
                                     Department :{" "}
-                                    {emp?.employee?.department_name || "N/A"}
+                                    {emp?.employee?.department_name || "---"}
                                 </Text>
 
                                 <Text style={styles.designation}>
                                     Designation :{" "}
-                                    {emp?.employee?.designation || "N/A"}
+                                    {emp?.employee?.designation || "---"}
                                 </Text>
                             </View>
 
