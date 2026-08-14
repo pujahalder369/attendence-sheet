@@ -1,9 +1,5 @@
 import * as XLSX from "xlsx-js-style";
 
-// =========================
-// BORDER
-// =========================
-
 export const borderStyle = {
   top: {
     style: "thin",
@@ -23,46 +19,20 @@ export const borderStyle = {
   },
 };
 
-// =========================
-// CENTER ALIGNMENT
-// =========================
-
-export const centerStyle = {
+export const centerAlignment = {
   horizontal: "center",
   vertical: "center",
   wrapText: true,
 };
 
-// =========================
-// MAIN TITLE
-// =========================
-
-export const titleStyle = {
-  font: {
-    bold: true,
-    color: { rgb: "FFFFFF" },
-    sz: 14,
-  },
-
-  fill: {
-    patternType: "solid",
-    fgColor: {
-      rgb: "1F4E78",
-    },
-  },
-
-  alignment: {
-    horizontal: "center",
-    vertical: "center",
-  },
-
-  border: borderStyle,
+export const leftAlignment = {
+  horizontal: "left",
+  vertical: "center",
+  wrapText: true,
 };
 
-// =========================
-// EMPLOYEE INFORMATION
-// =========================
 
+// EMPLOYEE INFORMATION
 export const employeeHeaderStyle = {
   font: {
     bold: true,
@@ -79,19 +49,13 @@ export const employeeHeaderStyle = {
     },
   },
 
-  alignment: {
-    horizontal: "left",
-    vertical: "center",
-    wrapText: true,
-  },
+  alignment: leftAlignment,
 
   border: borderStyle,
 };
 
-// =========================
-// DARK HEADER
-// =========================
 
+// SUMMARY HEADER
 export const headerStyle = {
   font: {
     bold: true,
@@ -108,15 +72,13 @@ export const headerStyle = {
     },
   },
 
-  alignment: centerStyle,
+  alignment: centerAlignment,
 
   border: borderStyle,
 };
 
-// =========================
-// SUMMARY DATA
-// =========================
 
+// SUMMARY DATA
 export const summaryDataStyle = {
   font: {
     bold: true,
@@ -133,15 +95,13 @@ export const summaryDataStyle = {
     },
   },
 
-  alignment: centerStyle,
+  alignment: centerAlignment,
 
   border: borderStyle,
 };
 
-// =========================
-// DAY HEADER
-// =========================
 
+// DAY HEADER
 export const dayHeaderStyle = {
   font: {
     bold: true,
@@ -158,15 +118,13 @@ export const dayHeaderStyle = {
     },
   },
 
-  alignment: centerStyle,
+  alignment: centerAlignment,
 
   border: borderStyle,
 };
 
-// =========================
-// LABEL COLUMN
-// =========================
 
+// LABEL
 export const labelStyle = {
   font: {
     bold: true,
@@ -183,164 +141,152 @@ export const labelStyle = {
     },
   },
 
-  alignment: {
-    horizontal: "left",
-    vertical: "center",
-    wrapText: true,
-  },
+  alignment: leftAlignment,
 
   border: borderStyle,
 };
 
-// =========================
+
 // STATUS COLORS
-// =========================
+export const statusConfig = {
+  P: {
+    background: "C6EFCE",
+    font: "006100",
+  },
 
-export const statusColors = {
-  P: "C6EFCE",
-  A: "FFC7CE",
-  L: "FFEB9C",
-  HD: "F4B084",
-  HO: "9DC3E6",
-  WO: "D9E1F2",
+  A: {
+    background: "FFC7CE",
+    font: "9C0006",
+  },
+
+  L: {
+    background: "FFEB9C",
+    font: "9C6500",
+  },
+
+  HD: {
+    background: "F4B084",
+    font: "843C0C",
+  },
+
+  HO: {
+    background: "9DC3E6",
+    font: "1F4E78",
+  },
+
+  WO: {
+    background: "D9E1F2",
+    font: "404040",
+  },
 };
 
-// =========================
-// STATUS FONT COLORS
-// =========================
 
-export const statusFontColors = {
-  P: "006100",
-  A: "9C0006",
-  L: "9C6500",
-  HD: "843C0C",
-  HO: "1F4E78",
-  WO: "404040",
-};
-
-// =========================
 // APPLY BORDER
-// =========================
-
 export const applyBorderToAllCells = (worksheet) => {
   Object.keys(worksheet).forEach((cellAddress) => {
     if (cellAddress.startsWith("!")) return;
 
-    const oldStyle = worksheet[cellAddress].s || {};
+    const cell = worksheet[cellAddress];
 
-    worksheet[cellAddress].s = {
-      ...oldStyle,
+    cell.s = {
+      ...(cell.s || {}),
 
       alignment: {
-        ...centerStyle,
+        ...centerAlignment,
+        ...(cell.s?.alignment || {}),
       },
 
       border: {
         ...borderStyle,
+        ...(cell.s?.border || {}),
       },
     };
   });
 };
 
-// =========================
-// EMPLOYEE HEADER STYLE
-// =========================
 
+// APPLY EMPLOYEE HEADER
 export const applyEmployeeHeaderStyle = (worksheet) => {
   ["A1", "A2", "A3", "A4"].forEach((cellAddress) => {
-    if (!worksheet[cellAddress]) return;
+    const cell = worksheet[cellAddress];
 
-    worksheet[cellAddress].s = {
+    if (!cell) return;
+
+    cell.s = {
       ...employeeHeaderStyle,
     };
   });
 };
 
-// =========================
-// TITLE STYLE
-// =========================
 
-export const applyTitleStyle = (worksheet) => {
-  if (!worksheet.A1) return;
+// GENERIC ROW STYLE
+const applyRowStyle = (
+  worksheet,
+  row,
+  totalColumns,
+  style
+) => {
+  for (let col = 0; col < totalColumns; col++) {
+    const cellAddress = XLSX.utils.encode_cell({
+      r: row,
+      c: col,
+    });
 
-  worksheet.A1.s = {
-    ...titleStyle,
-  };
+    const cell = worksheet[cellAddress];
+
+    if (!cell) continue;
+
+    cell.s = {
+      ...style,
+    };
+  }
 };
 
-// =========================
-// HEADER STYLE
-// =========================
 
+// SUMMARY HEADER
 export const applyHeaderStyle = (
   worksheet,
   row,
   totalColumns
 ) => {
-  for (let col = 0; col < totalColumns; col++) {
-    const cellAddress = XLSX.utils.encode_cell({
-      r: row,
-      c: col,
-    });
-
-    if (!worksheet[cellAddress]) continue;
-
-    worksheet[cellAddress].s = {
-      ...headerStyle,
-    };
-  }
+  applyRowStyle(
+    worksheet,
+    row,
+    totalColumns,
+    headerStyle
+  );
 };
 
-// =========================
-// SUMMARY DATA STYLE
-// =========================
 
+// SUMMARY DATA
 export const applySummaryDataStyle = (
   worksheet,
   row,
   totalColumns
 ) => {
-  for (let col = 0; col < totalColumns; col++) {
-    const cellAddress = XLSX.utils.encode_cell({
-      r: row,
-      c: col,
-    });
-
-    if (!worksheet[cellAddress]) continue;
-
-    worksheet[cellAddress].s = {
-      ...summaryDataStyle,
-    };
-  }
+  applyRowStyle(
+    worksheet,
+    row,
+    totalColumns,
+    summaryDataStyle
+  );
 };
 
-// =========================
-// DAY HEADER STYLE
-// =========================
-
+// DAY HEADER
 export const applyDayHeaderStyle = (
   worksheet,
   row,
   totalColumns
 ) => {
-  for (let col = 0; col < totalColumns; col++) {
-    const cellAddress = XLSX.utils.encode_cell({
-      r: row,
-      c: col,
-    });
-
-    if (!worksheet[cellAddress]) continue;
-
-    worksheet[cellAddress].s = {
-      ...dayHeaderStyle,
-    };
-  }
+  applyRowStyle(
+    worksheet,
+    row,
+    totalColumns,
+    dayHeaderStyle
+  );
 };
 
-// =========================
-// LABEL STYLE
-// =========================
-
+// LABEL COLUMN
 export const applyLabelStyle = (
   worksheet,
   rows
@@ -351,23 +297,24 @@ export const applyLabelStyle = (
       c: 0,
     });
 
-    if (!worksheet[cellAddress]) return;
+    const cell = worksheet[cellAddress];
 
-    worksheet[cellAddress].s = {
+    if (!cell) return;
+
+    cell.s = {
       ...labelStyle,
     };
   });
 };
 
-// =========================
 // STATUS STYLE
-// =========================
 
 export const applyStatusStyle = (
   worksheet,
-  statusRow
+  statusRow,
+  totalDays
 ) => {
-  for (let col = 1; col <= 31; col++) {
+  for (let col = 1; col <= totalDays; col++) {
     const cellAddress = XLSX.utils.encode_cell({
       r: statusRow,
       c: col,
@@ -377,19 +324,39 @@ export const applyStatusStyle = (
 
     if (!cell) continue;
 
-    const status = cell.v;
+    const config = statusConfig[cell.v];
 
-    const bgColor =
-      statusColors[status] || "FFFFFF";
+    // Default style
+    if (!config) {
+      cell.s = {
+        font: {
+          bold: true,
+          color: {
+            rgb: "000000",
+          },
+          sz: 10,
+        },
 
-    const fontColor =
-      statusFontColors[status] || "000000";
+        fill: {
+          patternType: "solid",
+          fgColor: {
+            rgb: "FFFFFF",
+          },
+        },
+
+        alignment: centerAlignment,
+
+        border: borderStyle,
+      };
+
+      continue;
+    }
 
     cell.s = {
       font: {
         bold: true,
         color: {
-          rgb: fontColor,
+          rgb: config.font,
         },
         sz: 10,
       },
@@ -397,18 +364,13 @@ export const applyStatusStyle = (
       fill: {
         patternType: "solid",
         fgColor: {
-          rgb: bgColor,
+          rgb: config.background,
         },
       },
 
-      alignment: {
-        horizontal: "center",
-        vertical: "center",
-      },
+      alignment: centerAlignment,
 
-      border: {
-        ...borderStyle,
-      },
+      border: borderStyle,
     };
   }
 };

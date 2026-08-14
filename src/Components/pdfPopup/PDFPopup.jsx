@@ -15,13 +15,21 @@ const PDFPopup = ({ closePopup }) => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
-    fetch("/data.json")
-      .then((res) => res.json())
-      .then((json) => setAttendanceData(json))
-      .catch((err) => {
+    const dataFetch = async () => {
+      try {
+        const res = await fetch("/data.json");
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        const json = await res.json();
+        setAttendanceData(json);
+      } catch (err) {
         console.error(err);
         toast.error("Failed to load attendance data");
-      });
+      }
+    }
+    dataFetch();
   }, []);
 
   // SELECT EMPLOYEE
@@ -86,10 +94,10 @@ const PDFPopup = ({ closePopup }) => {
 
   const handleSelectAll = (checked) => {
     if (checked) {
-      const allEmployeeIds = 
-      attendanceData.results.map((entry) => entry?.employee?.id).filter(Boolean);
+      const allEmployeeIds =
+        attendanceData.results.map((entry) => entry?.employee?.id).filter(Boolean);
       setSelectedEmployees(allEmployeeIds);
-    }else {
+    } else {
       setSelectedEmployees([]);
     }
   }
@@ -195,9 +203,7 @@ const PDFPopup = ({ closePopup }) => {
             </div>
           </div>
 
-          {/* =========================
-              BUTTONS
-          ========================= */}
+          {/* BUTTONS */}
           <div className="flex flex-col justify-center items-center gap-3">
             <button
               onClick={handleDownload}

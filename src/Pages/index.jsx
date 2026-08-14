@@ -2,15 +2,26 @@ import { useEffect, useState } from "react";
 import LeftPart from './Components/LeftPart';
 import RightPart from './Components/RightPart';
 import EmpData from './Components/EmpData';
+import { toast } from "react-toastify";
 
 const AttendenceSheet = () => {
     const [data, setData] = useState({ results: [] });
 
     useEffect(() => {
-        fetch("/data.json")
-            .then((res) => res.json())
-            .then((json) => setData(json))
-            .catch((err) => console.log(err));
+        const dataFetch = async () => {
+            try {
+                const res = await fetch("/data.json");
+                if (!res.ok) {
+                    throw new Error("Failed to fetch data")
+                }
+                const json = await res.json();
+                setData(json);
+            } catch (err) {
+                console.log(err);
+                toast.error("Failed to load attendance data");
+            }
+        }
+        dataFetch();
     }, []);
 
     return (

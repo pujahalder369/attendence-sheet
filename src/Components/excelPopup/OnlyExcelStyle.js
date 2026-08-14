@@ -3,15 +3,11 @@ import * as XLSX from "xlsx-js-style";
 export const COLORS = {
   header: "17365D",
   dayHeader: "2F75B5",
-
   white: "FFFFFF",
   black: "000000",
-
   border: "D9E1F2",
-
   employeeEven: "F8FAFC",
   employeeOdd: "EEF4FB",
-
   present: "C6EFCE",
   absent: "FFC7CE",
   leave: "FFEB9C",
@@ -22,8 +18,6 @@ export const COLORS = {
 
 
 // BORDER
-
-
 export const borderStyle = {
   top: {
     style: "thin",
@@ -56,8 +50,6 @@ export const borderStyle = {
 
 
 // CENTER ALIGNMENT
-
-
 export const centerAlignment = {
   horizontal: "center",
   vertical: "center",
@@ -66,8 +58,6 @@ export const centerAlignment = {
 
 
 // GENERAL STYLE
-
-
 export const applyGeneralStyle = (worksheet, totalRows, totalColumns) => {
   for (let row = 0; row < totalRows; row++) {
     for (let col = 0; col < totalColumns; col++) {
@@ -77,9 +67,7 @@ export const applyGeneralStyle = (worksheet, totalRows, totalColumns) => {
       });
 
       const cell = worksheet[cellAddress];
-
       if (!cell) continue;
-
       cell.s = {
         font: {
           sz: 10,
@@ -102,8 +90,6 @@ export const applyGeneralStyle = (worksheet, totalRows, totalColumns) => {
 
 
 // HEADER STYLE
-
-
 export const applyHeaderStyle = (worksheet, totalColumns) => {
   for (let col = 0; col < totalColumns; col++) {
     const cellAddress = XLSX.utils.encode_cell({
@@ -144,8 +130,6 @@ export const applyHeaderStyle = (worksheet, totalColumns) => {
 
 
 // EMPLOYEE STYLE
-
-
 export const applyEmployeeStyle = (worksheet, totalRows) => {
   for (let row = 1; row < totalRows; row++) {
     for (let col = 0; col < 4; col++) {
@@ -193,8 +177,6 @@ export const applyEmployeeStyle = (worksheet, totalRows) => {
 
 
 // SUMMARY STYLE
-
-
 export const applySummaryStyle = (worksheet, totalRows) => {
   const summaryColors = {
     4: COLORS.present,
@@ -247,8 +229,6 @@ export const applySummaryStyle = (worksheet, totalRows) => {
 
 
 // DAY STYLE
-
-
 export const applyDayStyle = (worksheet, totalRows) => {
   for (let row = 1; row < totalRows; row++) {
     for (let col = 10; col < 41; col++) {
@@ -292,8 +272,6 @@ export const applyDayStyle = (worksheet, totalRows) => {
 
 
 // STATUS STYLE
-
-
 export const applyStatusStyle = (worksheet, totalRows) => {
   const statusColors = {
     P: {
@@ -333,17 +311,11 @@ export const applyStatusStyle = (worksheet, totalRows) => {
         r: row,
         c: col,
       });
-
       const cell = worksheet[cellAddress];
-
       if (!cell) continue;
-
       const status = cell.v;
-
       const style = statusColors[status];
-
       if (!style) continue;
-
       cell.s = {
         font: {
           bold: true,
@@ -376,8 +348,6 @@ export const applyStatusStyle = (worksheet, totalRows) => {
 
 
 // COLUMN WIDTH
-
-
 export const applyColumnWidth = (worksheet, header, rows) => {
   const columnWidths = [];
 
@@ -394,38 +364,26 @@ export const applyColumnWidth = (worksheet, header, rows) => {
 
     let width;
 
-    // EmpCode
     if (col === 0) {
       width = 12;
     }
-
-    // Name
     else if (col === 1) {
       width = 22;
     }
-
-    // Department
     else if (col === 2) {
       width = 20;
     }
-
-    // Designation
     else if (col === 3) {
       width = 20;
     }
-
-    // Summary
     else if (col >= 4 && col <= 9) {
       width = 11;
     }
-
-    // Day 1 - Day 31
     else {
       width = 10;
     }
 
     width = Math.max(width, Math.min(maxLength + 2, 20));
-
     columnWidths.push({
       wch: width,
     });
@@ -436,8 +394,6 @@ export const applyColumnWidth = (worksheet, header, rows) => {
 
 
 // ROW HEIGHT
-
-
 export const applyRowHeight = (worksheet, totalRows) => {
   worksheet["!rows"] = [];
 
