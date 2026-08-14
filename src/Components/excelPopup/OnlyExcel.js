@@ -1,4 +1,5 @@
-import * as XLSX from "xlsx-js-style";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import { getStatus } from "../AttendencePDF/pdfHelper";
 import {
   applyGeneralStyle,
@@ -9,110 +10,229 @@ import {
   applyStatusStyle,
   applyColumnWidth,
   applyRowHeight,
+  applyWorksheetSettings,
 } from "./OnlyExcelStyle";
 
-export const downloadOnlyExcel = (selectedData) => {
-  const workbook = XLSX.utils.book_new();
+const TOTAL_DAYS = 31;
+const EMPLOYEE_COLUMNS = 9;
+const TOTAL_COLUMNS =
+  EMPLOYEE_COLUMNS + TOTAL_DAYS;
 
-  // HEADER
-  const header = [
-    "EmpCode",
-    "Name",
-    "Department",
-    "Designation",
-    "Present",
-    "Absent",
-    "Leave",
-    "HD",
-    "HO",
-    "WO",
-  ];
-
-  // DAY 1 - DAY 31
-  for (let day = 1; day <= 31; day++) {
-    header.push(day);
-  }
-
-  // DATA ROWS
-  const rows = [];
-
-  selectedData.forEach((empData) => {
-    const employee = empData?.employee;
-    const attendances = empData?.attendances ?? [];
-    const statusList = attendances.map((attendance) => getStatus(attendance));
-
-    // STATUS COUNT
-    const present = statusList.filter((status) => status === "P").length;
-    const absent = statusList.filter((status) => status === "A").length;
-    const leave = statusList.filter((status) => status === "L").length;
-    const halfDay = statusList.filter((status) => status === "HD").length;
-    const holiday = statusList.filter((status) => status === "HO").length;
-    const weekOff = statusList.filter((status) => status === "WO").length;
-
-    // EMPLOYEE INFORMATION
-    const row = [
-      employee?.id ?? "---",
-
-      `${employee?.first_name ?? "---"} ${employee?.last_name ?? "---"}`,
-      employee?.department_name ?? "---",
-      employee?.designation ?? "---",
-      present,
-      absent,
-      leave,
-      halfDay,
-      holiday,
-      weekOff,
-    ];
-
-    // DAY 1 - DAY 31 STATUS
-    for (let day = 0; day < 31; day++) {
-      const attendance = attendances[day];
-      const status = attendance ? getStatus(attendance) : "-";
-      row.push(status);
+export const downloadOnlyExcel = async (
+  selectedData = []
+) => {
+  try {
+    if (
+      !Array.isArray(selectedData) ||
+      selectedData.length === 0
+    ) {
+      console.warn(
+        "No employee data available"
+      );
+      return;
     }
 
-    rows.push(row);
-  });
+    // CREATE WORKBOOK
+    const workbook =
+      new ExcelJS.Workbook();
 
-  // CREATE WORKSHEET
-  const worksheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
-  const totalRows = rows.length + 1;
-  const totalColumns = header.length;
+    workbook.creator =
+      "Attendance System";
 
-  // GENERAL STYLE
-  applyGeneralStyle(worksheet, totalRows, totalColumns);
+    workbook.lastModifiedBy =
+      "Attendance System";
 
-  // HEADER STYLE
-  applyHeaderStyle(worksheet, totalColumns);
+    workbook.created = new Date();
+    workbook.modified = new Date();
 
-  // EMPLOYEE STYLE
-  applyEmployeeStyle(worksheet, totalRows);
+    // CREATE WORKSHEET
+    const worksheet =
+      workbook.addWorksheet(
+        "Attendance Report"
+      );
 
-  // SUMMARY STYLE
-  applySummaryStyle(worksheet, totalRows);
+    
+    // HEADER
+    const header = [
+      "EmpCode",
+      "Name",
+      "Department",
+      "Present",
+      "Absent",
+      "Leave",
+      "HD",
+      "HO",
+      "WO",
+      ...Array.from(
+        { length: TOTAL_DAYS },
+        (_, index) => index + 1
+      ),
+    ];
 
-  // DAY STYLE
-  applyDayStyle(worksheet, totalRows);
+    worksheet.addRow(header);
 
-  // STATUS COLOR
-  applyStatusStyle(worksheet, totalRows);
+    
+    // EMPLOYEE DATA
+    selectedData.forEach(
+      (empData) => {
+        const employee =
+          empData?.employee;
 
-  // COLUMN WIDTH
-  applyColumnWidth(worksheet, header, rows);
+        const attendances =
+          empData?.attendances ?? [];
 
-  // ROW HEIGHT
-  applyRowHeight(worksheet, totalRows);
+        
+        // STATUS COUNT
+        const statusCount = {
+          P: 0,
+          A: 0,
+          L: 0,
+          HD: 0,
+          HO: 0,
+          WO: 0,
+        };
 
-  // FREEZE
-  worksheet["!freeze"] = {
-    xSplit: 10,
-    ySplit: 1,
-  };
+        
+        // DAY STATUS
+        const dayStatuses =
+          Array(TOTAL_DAYS).fill("-");
 
-  // AUTO FILTER
-  worksheet["!autofilter"] = {
-    ref: `A1:${XLSX.utils.encode_col(totalColumns - 1)}${totalRows}`,
-  };
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance Report");
-  XLSX.writeFile(workbook, "attendance-report.xlsx");
+        attendances.forEach(
+          (attendance, index) => {
+            const status =
+              getStatus(attendance);
+            if (
+              statusCount[status] !==
+              undefined
+            ) {
+              statusCount[status]++;
+            }
+            if (
+              index < TOTAL_DAYS
+            ) {
+              dayStatuses[index] =
+                status;
+            }
+          }
+        );
+
+        
+        // EMPLOYEE ROW
+        const employeeName =
+          `${employee?.first_name ?? "---"} ${
+            employee?.last_name ?? "---"
+          }`;
+
+        const row = [
+          employee?.id ?? "---",
+          employeeName,
+          employee?.department_name ?? "---",
+          statusCount.P,
+          statusCount.A,
+          statusCount.L,
+          statusCount.HD,
+          statusCount.HO,
+          statusCount.WO,
+          ...dayStatuses,
+        ];
+
+        worksheet.addRow(row);
+      }
+    );
+    
+    // TOTAL ROWS
+    const totalRows =
+      worksheet.rowCount;
+    
+    // APPLY STYLES
+    applyGeneralStyle(
+      worksheet,
+      totalRows,
+      TOTAL_COLUMNS
+    );
+
+    applyHeaderStyle(
+      worksheet,
+      TOTAL_COLUMNS
+    );
+
+    applyEmployeeStyle(
+      worksheet,
+      totalRows
+    );
+
+    applySummaryStyle(
+      worksheet,
+      totalRows
+    );
+
+    applyDayStyle(
+      worksheet,
+      totalRows
+    );
+
+    applyStatusStyle(
+      worksheet,
+      totalRows
+    );
+
+    applyColumnWidth(
+      worksheet,
+      header
+    );
+
+    applyRowHeight(
+      worksheet,
+      totalRows
+    );
+
+    applyWorksheetSettings(
+      worksheet
+    );
+    
+    // FREEZE PANES
+    worksheet.views = [
+      {
+        state: "frozen",
+        xSplit: 2,
+        ySplit: 1,
+      },
+    ];
+
+    
+    // AUTO FILTER
+    worksheet.autoFilter = {
+      from: {
+        row: 1,
+        column: 1,
+      },
+
+      to: {
+        row: totalRows,
+        column: TOTAL_COLUMNS,
+      },
+    };
+    
+    // GENERATE BUFFER
+    const buffer =
+      await workbook.xlsx.writeBuffer();
+    
+    // DOWNLOAD
+    const blob = new Blob(
+      [buffer],
+      {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }
+    );
+
+    saveAs(
+      blob,
+      "attendance-report.xlsx"
+    );
+  } catch (error) {
+    console.error(
+      "Excel generation failed:",
+      error
+    );
+  }
 };

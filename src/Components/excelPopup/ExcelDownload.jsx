@@ -1,76 +1,43 @@
-import * as XLSX from "xlsx-js-style";
-
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import {
   getStatus,
   formatDuration,
 } from "../AttendencePDF/pdfHelper";
-
 import {
-  applyBorderToAllCells,
-  applyEmployeeHeaderStyle,
-  applyHeaderStyle,
+  applyEmployeeInfoStyle,
+  applySummaryHeaderStyle,
   applySummaryDataStyle,
   applyDayHeaderStyle,
   applyLabelStyle,
   applyStatusStyle,
+  applyAllBorders,
+  applyColumnWidths,
+  applyRowHeights,
+  applyWorksheetSettings,
 } from "./ExcelStyle";
-
 
 const TOTAL_DAYS = 31;
 const TOTAL_COLUMNS = TOTAL_DAYS + 1;
 
-const EMPTY_VALUE = "-";
-
-
-// SAFE EMPLOYEE NAME
-const getEmployeeName = (employee) => {
+// GET EMPLOYEE NAME
+const getEmployeeName = (
+  employee
+) => {
   const firstName =
     employee?.first_name?.trim() || "---";
 
   const lastName =
     employee?.last_name?.trim() || "---";
 
-  const fullName =
-    `${firstName} ${lastName}`.trim();
-
-  return fullName || "---";
-};
-
-
-// GET ATTENDANCE
-const getAttendance = (
-  attendances,
-  index
-) => {
-  return attendances?.[index] ?? null;
-};
-
-
-// GET DAY VALUES
-const createDayValues = (
-  attendances,
-  callback
-) => {
-  return Array.from(
-    { length: TOTAL_DAYS },
-    (_, index) => {
-      const attendance =
-        getAttendance(
-          attendances,
-          index
-        );
-
-      return callback(
-        attendance,
-        index
-      );
-    }
+  return (
+    `${firstName} ${lastName}`.trim() ||
+    "---"
   );
 };
 
-
 // STATUS SUMMARY
-const calculateStatusSummary = (
+const getStatusSummary = (
   attendances
 ) => {
   const summary = {
@@ -82,391 +49,292 @@ const calculateStatusSummary = (
     WO: 0,
   };
 
-  attendances.forEach((attendance) => {
-    const status =
-      getStatus(attendance);
+  attendances.forEach(
+    (attendance) => {
+      const status =
+        getStatus(attendance);
 
-    if (
-      Object.prototype.hasOwnProperty.call(
-        summary,
-        status
-      )
-    ) {
-      summary[status]++;
+      if (
+        summary[status] !== undefined
+      ) {
+        summary[status]++;
+      }
     }
-  });
+  );
 
   return summary;
 };
 
-
 // CREATE EMPLOYEE INFORMATION
-const createEmployeeInfoRows = (
+const addEmployeeInformation = (
+  worksheet,
   employee
 ) => {
   const name =
     getEmployeeName(employee);
 
-  return [
-    [
-      `EmpCode : ${
-        employee?.id ?? "---"
-      }`,
-    ],
+  worksheet.mergeCells(
+    "A1:AF1"
+  );
 
-    [
-      `Name : ${name}`,
-    ],
+  worksheet.mergeCells(
+    "A2:AF2"
+  );
 
-    [
-      `Department : ${
-        employee?.department_name ||
-        "---"
-      }`,
-    ],
+  worksheet.mergeCells(
+    "A3:AF3"
+  );
 
-    [
-      `Designation : ${
-        employee?.designation ||
-        "---"
-      }`,
-    ],
+  worksheet.mergeCells(
+    "A4:AF4"
+  );
 
-    [],
-  ];
+  worksheet.getCell(1, 1).value =
+    `EmpCode : ${
+      employee?.id ?? "---"
+    }`;
+
+  worksheet.getCell(2, 1).value =
+    `Name : ${name}`;
+
+  worksheet.getCell(3, 1).value =
+    `Department : ${
+      employee?.department_name ||
+      "---"
+    }`;
+
+  worksheet.getCell(4, 1).value =
+    `Designation : ${
+      employee?.designation ||
+      "---"
+    }`;
 };
 
-
-// CREATE SUMMARY ROWS
-const createSummaryRows = (
+// ADD SUMMARY
+const addSummary = (
+  worksheet,
   employee,
   summary
 ) => {
-  const name =
-    getEmployeeName(employee);
+  const name = getEmployeeName(employee);
 
-  return [
-    [
-      "EmpCode",
-      "Name",
-      "Present",
-      "Absent",
-      "Leave",
-      "Halfday",
-      "Holiday",
-      "WeekOff",
-    ],
+  worksheet.addRow([]);
 
-    [
-      employee?.id ?? "---",
-      name,
-      summary.P,
-      summary.A,
-      summary.L,
-      summary.HD,
-      summary.HO,
-      summary.WO,
-    ],
+  worksheet.addRow([
+    "EmpCode",
+    "Name",
+    "Present",
+    "Absent",
+    "Leave",
+    "Halfday",
+    "Holiday",
+    "WeekOff",
+  ]);
 
-    [],
-  ];
+  // Data
+  worksheet.addRow([
+    employee?.id ?? "---",
+    name,
+    summary.P,
+    summary.A,
+    summary.L,
+    summary.HD,
+    summary.HO,
+    summary.WO,
+  ]);
 };
 
-
-// CREATE DAY HEADER
-const createDayHeader = () => {
-  return [
-    "Label",
-    ...Array.from(
-      { length: TOTAL_DAYS },
-      (_, index) => index + 1
-    ),
-  ];
-};
-
-
-// CREATE ATTENDANCE ROWS
-const createAttendanceRows = (
+// ADD ATTENDANCE DATA
+const addAttendanceData = (
+  worksheet,
   attendances
 ) => {
-  const inTimeRow = [
-    "IN Time",
+  worksheet.addRow([]);
 
-    ...createDayValues(
-      attendances,
-      (attendance) =>
-        attendance?.in_formatted_time ||
-        EMPTY_VALUE
+  worksheet.addRow([
+    "Label",
+
+    ...Array.from(
+      {
+        length: TOTAL_DAYS,
+      },
+      (_, index) =>
+        index + 1
     ),
-  ];
+  ]);
 
-  const outTimeRow = [
+  // IN TIME
+  worksheet.addRow([
+    "IN Time",
+    ...Array.from(
+      {
+        length: TOTAL_DAYS,
+      },
+      (_, index) =>
+        attendances[index]
+          ?.in_formatted_time ||
+        "-",
+    ),
+  ]);
+
+  // OUT TIME
+  worksheet.addRow([
     "OUT Time",
 
-    ...createDayValues(
-      attendances,
-      (attendance) =>
-        attendance?.out_formatted_time ||
-        EMPTY_VALUE
+    ...Array.from(
+      {
+        length: TOTAL_DAYS,
+      },
+      (_, index) =>
+        attendances[index]
+          ?.out_formatted_time ||
+        "-",
     ),
-  ];
+  ]);
 
-  const workingRow = [
+  // WORKING
+  worksheet.addRow([
     "Working",
+    ...Array.from(
+      {
+        length: TOTAL_DAYS,
+      },
+      (_, index) => {
+        const attendance =
+          attendances[index];
 
-    ...createDayValues(
-      attendances,
-      (attendance) =>
-        attendance
+        return attendance
           ? formatDuration(
-              attendance?.duration || 0
+              attendance.duration ||
+                0
             )
-          : EMPTY_VALUE
+          : "-";
+      }
     ),
-  ];
+  ]);
 
-  const overtimeRow = [
+  // OVERTIME
+  worksheet.addRow([
     "O.Times",
 
-    ...createDayValues(
-      attendances,
-      (attendance) =>
-        attendance
-          ? formatDuration(
-              attendance?.ot || 0
-            )
-          : EMPTY_VALUE
-    ),
-  ];
+    ...Array.from(
+      {
+        length: TOTAL_DAYS,
+      },
+      (_, index) => {
+        const attendance =
+          attendances[index];
 
-  const statusRow = [
+        return attendance
+          ? formatDuration(
+              attendance.ot || 0
+            )
+          : "-";
+      }
+    ),
+  ]);
+
+  // STATUS
+  worksheet.addRow([
     "Status",
 
-    ...createDayValues(
-      attendances,
-      (attendance) =>
-        attendance
+    ...Array.from(
+      {
+        length: TOTAL_DAYS,
+      },
+      (_, index) => {
+        const attendance =
+          attendances[index];
+
+        return attendance
           ? getStatus(attendance)
-          : EMPTY_VALUE
-    ),
-  ];
-
-  return [
-    inTimeRow,
-    outTimeRow,
-    workingRow,
-    overtimeRow,
-    statusRow,
-  ];
-};
-
-
-// CREATE ALL ROWS
-const createWorksheetRows = (
-  employee,
-  attendances
-) => {
-  const summary =
-    calculateStatusSummary(
-      attendances
-    );
-
-  const employeeRows =
-    createEmployeeInfoRows(
-      employee
-    );
-
-  const summaryRows =
-    createSummaryRows(
-      employee,
-      summary
-    );
-
-  const dayHeader =
-    createDayHeader();
-
-  const attendanceRows =
-    createAttendanceRows(
-      attendances
-    );
-
-  return [
-    ...employeeRows,
-    ...summaryRows,
-    dayHeader,
-    ...attendanceRows,
-  ];
-};
-
-
-// COLUMN WIDTH
-const applyColumnWidths = (
-  worksheet,
-  rows
-) => {
-  const widths = [];
-
-  for (
-    let col = 0;
-    col < TOTAL_COLUMNS;
-    col++
-  ) {
-    let maxLength = 0;
-
-    rows.forEach((row) => {
-      const value = row?.[col];
-
-      if (
-        value !== undefined &&
-        value !== null
-      ) {
-        maxLength = Math.max(
-          maxLength,
-          String(value).length
-        );
+          : "-";
       }
-    });
-
-    let width =
-      Math.max(
-        maxLength + 2,
-        col === 0 ? 15 : 10
-      );
-
-    width =
-      Math.min(width, 22);
-
-    widths.push({
-      wch: width,
-    });
-  }
-
-  worksheet["!cols"] = widths;
+    ),
+  ]);
 };
 
-
-// MERGE EMPLOYEE INFORMATION
-const applyEmployeeMerges = (
+// APPLY ALL STYLES
+const applyStyles = (
   worksheet
 ) => {
-  worksheet["!merges"] =
-    Array.from(
-      { length: 4 },
-      (_, row) => ({
-        s: {
-          r: row,
-          c: 0,
-        },
-
-        e: {
-          r: row,
-          c: TOTAL_COLUMNS - 1,
-        },
-      })
-    );
-};
-
-
-// ROW HEIGHT
-const applyRowHeights = (
-  worksheet
-) => {
-  worksheet["!rows"] = [
-    { hpt: 24 },
-    { hpt: 22 },
-    { hpt: 22 },
-    { hpt: 22 },
-    { hpt: 8 },
-    { hpt: 22 },
-    { hpt: 22 },
-    { hpt: 8 },
-    { hpt: 22 },
-    { hpt: 22 },
-    { hpt: 22 },
-    { hpt: 22 },
-    { hpt: 22 },
-    { hpt: 22 },
-  ];
-};
-
-
-// APPLY STYLES
-const applyWorksheetStyles = (
-  worksheet,
-  rows
-) => {
-  applyBorderToAllCells(
-    worksheet
-  );
-
-  applyEmployeeHeaderStyle(
-    worksheet
-  );
-
-  applyHeaderStyle(
+  applyEmployeeInfoStyle(
     worksheet,
-    5,
+    TOTAL_COLUMNS
+  );
+  applySummaryHeaderStyle(
+    worksheet,
     8
   );
-
   applySummaryDataStyle(
     worksheet,
-    6,
     8
   );
 
   // Day header
   applyDayHeaderStyle(
     worksheet,
-    8,
     TOTAL_COLUMNS
   );
 
-  // Labels
+  // Label column
   applyLabelStyle(
     worksheet,
-    [8, 9, 10, 11, 12, 13]
+    9,
+    14
   );
 
-  // Status
-  const statusRow =
-    rows.length - 1;
-
+  // Status colors
   applyStatusStyle(
     worksheet,
-    statusRow,
+    14,
     TOTAL_DAYS
+  );
+
+  // General borders
+  applyAllBorders(
+    worksheet
+  );
+
+  // Column widths
+  applyColumnWidths(
+    worksheet,
+    TOTAL_COLUMNS
   );
 
   // Row heights
   applyRowHeights(
     worksheet
   );
+
+  // Freeze + page setup
+  applyWorksheetSettings(
+    worksheet
+  );
 };
 
-
-// SHEET NAME
-const createUniqueSheetName = (
+// CREATE UNIQUE SHEET NAME
+const getUniqueSheetName = (
   workbook,
   employee,
-  employeeIndex
+  index
 ) => {
-  const baseName =
-    getEmployeeName(employee)
+  const name =
+    getEmployeeName(employee);
+
+  let sheetName =
+    name
       .replace(
         /[\\/?*[\]:]/g,
         ""
       )
       .substring(0, 25) ||
-    `Employee${employeeIndex + 1}`;
-
-  let sheetName =
-    baseName;
+    `Employee${index + 1}`;
 
   let counter = 1;
 
   while (
-    workbook.SheetNames.includes(
+    workbook.getWorksheet(
       sheetName
     )
   ) {
@@ -474,7 +342,7 @@ const createUniqueSheetName = (
       `_${counter}`;
 
     sheetName =
-      `${baseName.substring(
+      `${name.substring(
         0,
         31 - suffix.length
       )}${suffix}`;
@@ -485,12 +353,11 @@ const createUniqueSheetName = (
   return sheetName;
 };
 
-
-// CREATE WORKSHEET
-const createEmployeeWorksheet = (
+// CREATE EMPLOYEE SHEET
+const createEmployeeSheet = (
   workbook,
   empData,
-  employeeIndex
+  index
 ) => {
   const employee =
     empData?.employee;
@@ -498,55 +365,47 @@ const createEmployeeWorksheet = (
   const attendances =
     empData?.attendances ?? [];
 
-  const rows =
-    createWorksheetRows(
-      employee,
+  const summary =
+    getStatusSummary(
       attendances
     );
 
-  const worksheet =
-    XLSX.utils.aoa_to_sheet(
-      rows
-    );
-
-  applyColumnWidths(
-    worksheet,
-    rows
-  );
-
-  applyEmployeeMerges(
-    worksheet
-  );
-
-  applyWorksheetStyles(
-    worksheet,
-    rows
-  );
-
-  // Freeze panes
-  worksheet["!freeze"] = {
-    xSplit: 1,
-    ySplit: 9,
-  };
-
-  // Sheet name
   const sheetName =
-    createUniqueSheetName(
+    getUniqueSheetName(
       workbook,
       employee,
-      employeeIndex
+      index
     );
 
-  // Add worksheet
-  XLSX.utils.book_append_sheet(
-    workbook,
+  const worksheet =
+    workbook.addWorksheet(
+      sheetName
+    );
+
+  addEmployeeInformation(
     worksheet,
-    sheetName
+    employee
+  );
+
+  addSummary(
+    worksheet,
+    employee,
+    summary
+  );
+
+  addAttendanceData(
+    worksheet,
+    attendances
+  );
+
+  applyStyles(
+    worksheet
   );
 };
 
+// DOWNLOAD EXCEL
 
-export const downloadExcel = (
+export const downloadExcel = async (
   selectedData = []
 ) => {
   if (
@@ -560,21 +419,44 @@ export const downloadExcel = (
     return;
   }
 
-  const workbook =
-    XLSX.utils.book_new();
+  try {
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = "Attendance System";
+    workbook.lastModifiedBy = "Attendance System";
+    workbook.created = new Date();
+    workbook.modified = new Date();
 
-  selectedData.forEach(
-    (empData, employeeIndex) => {
-      createEmployeeWorksheet(
-        workbook,
-        empData,
-        employeeIndex
-      );
-    }
-  );
+    // Create employee sheets
+    selectedData.forEach(
+      (empData, index) => {
+        createEmployeeSheet(
+          workbook,
+          empData,
+          index
+        );
+      }
+    );
 
-  XLSX.writeFile(
-    workbook,
-    "attendance-report.xlsx"
-  );
+    // Generate buffer
+    const buffer = await workbook.xlsx.writeBuffer();
+
+    // Create Blob
+    const blob = new Blob(
+      [buffer],
+      {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }
+    );
+
+    // Download
+    saveAs(
+      blob,
+      "attendance-report.xlsx"
+    );
+  } catch (error) {
+    console.error(
+      "Excel generation failed:",
+      error
+    );
+  }
 };

@@ -1,376 +1,471 @@
-import * as XLSX from "xlsx-js-style";
+import ExcelJS from "exceljs";
 
-export const borderStyle = {
-  top: {
-    style: "thin",
-    color: { rgb: "B7B7B7" },
+export const COLORS = {
+  employeeHeader: "FFD9EAF7",
+  summaryHeader: "FF404040",
+  summaryData: "FFF3F6F9",
+  dayHeader: "FF5B9BD5",
+  label: "FFEAF2F8",
+  border: "FFB7B7B7",
+  white: "FFFFFFFF",
+  black: "FF000000",
+};
+
+// STATUS COLORS
+export const STATUS_COLORS = {
+  P: {
+    background: "FFC6EFCE",
+    font: "FF006100",
   },
-  bottom: {
-    style: "thin",
-    color: { rgb: "B7B7B7" },
+
+  A: {
+    background: "FFFFC7CE",
+    font: "FF9C0006",
   },
-  left: {
-    style: "thin",
-    color: { rgb: "B7B7B7" },
+
+  L: {
+    background: "FFFFEB9C",
+    font: "FF9C6500",
   },
-  right: {
-    style: "thin",
-    color: { rgb: "B7B7B7" },
+
+  HD: {
+    background: "FFF4B084",
+    font: "FF843C0C",
+  },
+
+  HO: {
+    background: "FF9DC3E6",
+    font: "FF1F4E78",
+  },
+
+  WO: {
+    background: "FFD9E1F2",
+    font: "FF404040",
   },
 };
 
+// BORDER
+export const borderStyle = {
+  top: {
+    style: "thin",
+    color: {
+      argb: COLORS.border,
+    },
+  },
+
+  bottom: {
+    style: "thin",
+    color: {
+      argb: COLORS.border,
+    },
+  },
+
+  left: {
+    style: "thin",
+    color: {
+      argb: COLORS.border,
+    },
+  },
+
+  right: {
+    style: "thin",
+    color: {
+      argb: COLORS.border,
+    },
+  },
+};
+
+// ALIGNMENTS
 export const centerAlignment = {
   horizontal: "center",
-  vertical: "center",
+  vertical: "middle",
   wrapText: true,
 };
 
 export const leftAlignment = {
   horizontal: "left",
-  vertical: "center",
+  vertical: "middle",
   wrapText: true,
 };
 
-
-// EMPLOYEE INFORMATION
-export const employeeHeaderStyle = {
-  font: {
-    bold: true,
-    sz: 11,
-    color: {
-      rgb: "222222",
-    },
-  },
-
-  fill: {
-    patternType: "solid",
-    fgColor: {
-      rgb: "D9EAF7",
-    },
-  },
-
-  alignment: leftAlignment,
-
-  border: borderStyle,
-};
-
-
-// SUMMARY HEADER
-export const headerStyle = {
-  font: {
-    bold: true,
-    color: {
-      rgb: "FFFFFF",
-    },
-    sz: 11,
-  },
-
-  fill: {
-    patternType: "solid",
-    fgColor: {
-      rgb: "404040",
-    },
-  },
-
-  alignment: centerAlignment,
-
-  border: borderStyle,
-};
-
-
-// SUMMARY DATA
-export const summaryDataStyle = {
-  font: {
-    bold: true,
-    color: {
-      rgb: "000000",
-    },
-    sz: 10,
-  },
-
-  fill: {
-    patternType: "solid",
-    fgColor: {
-      rgb: "F3F6F9",
-    },
-  },
-
-  alignment: centerAlignment,
-
-  border: borderStyle,
-};
-
-
-// DAY HEADER
-export const dayHeaderStyle = {
-  font: {
-    bold: true,
-    color: {
-      rgb: "FFFFFF",
-    },
-    sz: 10,
-  },
-
-  fill: {
-    patternType: "solid",
-    fgColor: {
-      rgb: "5B9BD5",
-    },
-  },
-
-  alignment: centerAlignment,
-
-  border: borderStyle,
-};
-
-
-// LABEL
-export const labelStyle = {
-  font: {
-    bold: true,
-    color: {
-      rgb: "222222",
-    },
-    sz: 10,
-  },
-
-  fill: {
-    patternType: "solid",
-    fgColor: {
-      rgb: "EAF2F8",
-    },
-  },
-
-  alignment: leftAlignment,
-
-  border: borderStyle,
-};
-
-
-// STATUS COLORS
-export const statusConfig = {
-  P: {
-    background: "C6EFCE",
-    font: "006100",
-  },
-
-  A: {
-    background: "FFC7CE",
-    font: "9C0006",
-  },
-
-  L: {
-    background: "FFEB9C",
-    font: "9C6500",
-  },
-
-  HD: {
-    background: "F4B084",
-    font: "843C0C",
-  },
-
-  HO: {
-    background: "9DC3E6",
-    font: "1F4E78",
-  },
-
-  WO: {
-    background: "D9E1F2",
-    font: "404040",
-  },
-};
-
-
-// APPLY BORDER
-export const applyBorderToAllCells = (worksheet) => {
-  Object.keys(worksheet).forEach((cellAddress) => {
-    if (cellAddress.startsWith("!")) return;
-
-    const cell = worksheet[cellAddress];
-
-    cell.s = {
-      ...(cell.s || {}),
-
-      alignment: {
-        ...centerAlignment,
-        ...(cell.s?.alignment || {}),
-      },
-
-      border: {
-        ...borderStyle,
-        ...(cell.s?.border || {}),
-      },
-    };
-  });
-};
-
-
-// APPLY EMPLOYEE HEADER
-export const applyEmployeeHeaderStyle = (worksheet) => {
-  ["A1", "A2", "A3", "A4"].forEach((cellAddress) => {
-    const cell = worksheet[cellAddress];
-
-    if (!cell) return;
-
-    cell.s = {
-      ...employeeHeaderStyle,
-    };
-  });
-};
-
-
-// GENERIC ROW STYLE
-const applyRowStyle = (
+// EMPLOYEE INFORMATION STYLE
+export const applyEmployeeInfoStyle = (
   worksheet,
-  row,
-  totalColumns,
-  style
+  totalColumns
 ) => {
-  for (let col = 0; col < totalColumns; col++) {
-    const cellAddress = XLSX.utils.encode_cell({
-      r: row,
-      c: col,
-    });
+  for (let row = 1; row <= 4; row++) {
+    const cell =
+      worksheet.getCell(row, 1);
 
-    const cell = worksheet[cellAddress];
+    cell.font = {
+      bold: true,
+      size: 11,
+      color: {
+        argb: "FF222222",
+      },
+    };
 
-    if (!cell) continue;
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {
+        argb: COLORS.employeeHeader,
+      },
+    };
 
-    cell.s = {
-      ...style,
+    cell.alignment = {
+      ...leftAlignment,
+    };
+
+    applyBorderToRange(
+      worksheet,
+      row,
+      row,
+      1,
+      totalColumns
+    );
+  }
+};
+
+// SUMMARY HEADER STYLE
+export const applySummaryHeaderStyle = (
+  worksheet,
+  totalColumns = 8
+) => {
+  for (
+    let col = 1;
+    col <= totalColumns;
+    col++
+  ) {
+    const cell =
+      worksheet.getCell(6, col);
+
+    cell.font = {
+      bold: true,
+      size: 11,
+      color: {
+        argb: COLORS.white,
+      },
+    };
+
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {
+        argb: COLORS.summaryHeader,
+      },
+    };
+
+    cell.alignment = {
+      ...centerAlignment,
+    };
+
+    cell.border = {
+      ...borderStyle,
     };
   }
 };
 
-
-// SUMMARY HEADER
-export const applyHeaderStyle = (
-  worksheet,
-  row,
-  totalColumns
-) => {
-  applyRowStyle(
-    worksheet,
-    row,
-    totalColumns,
-    headerStyle
-  );
-};
-
-
-// SUMMARY DATA
+// SUMMARY DATA STYLE
 export const applySummaryDataStyle = (
   worksheet,
-  row,
-  totalColumns
+  totalColumns = 8
 ) => {
-  applyRowStyle(
-    worksheet,
-    row,
-    totalColumns,
-    summaryDataStyle
-  );
+  for (
+    let col = 1;
+    col <= totalColumns;
+    col++
+  ) {
+    const cell =
+      worksheet.getCell(7, col);
+
+    cell.font = {
+      bold: true,
+      size: 10,
+      color: {
+        argb: COLORS.black,
+      },
+    };
+
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {
+        argb: COLORS.summaryData,
+      },
+    };
+
+    cell.alignment = {
+      ...centerAlignment,
+    };
+
+    cell.border = {
+      ...borderStyle,
+    };
+  }
 };
 
-// DAY HEADER
+// DAY HEADER STYLE
 export const applyDayHeaderStyle = (
   worksheet,
-  row,
   totalColumns
 ) => {
-  applyRowStyle(
-    worksheet,
-    row,
-    totalColumns,
-    dayHeaderStyle
-  );
+  for (
+    let col = 1;
+    col <= totalColumns;
+    col++
+  ) {
+    const cell =
+      worksheet.getCell(9, col);
+
+    cell.font = {
+      bold: true,
+      size: 10,
+      color: {
+        argb: COLORS.white,
+      },
+    };
+
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {
+        argb: COLORS.dayHeader,
+      },
+    };
+
+    cell.alignment = {
+      ...centerAlignment,
+    };
+
+    cell.border = {
+      ...borderStyle,
+    };
+  }
 };
 
-// LABEL COLUMN
+// LABEL STYLE
 export const applyLabelStyle = (
   worksheet,
-  rows
+  startRow,
+  endRow
 ) => {
-  rows.forEach((row) => {
-    const cellAddress = XLSX.utils.encode_cell({
-      r: row,
-      c: 0,
-    });
+  for (
+    let row = startRow;
+    row <= endRow;
+    row++
+  ) {
+    const cell =
+      worksheet.getCell(row, 1);
 
-    const cell = worksheet[cellAddress];
-
-    if (!cell) return;
-
-    cell.s = {
-      ...labelStyle,
+    cell.font = {
+      bold: true,
+      size: 10,
+      color: {
+        argb: "FF222222",
+      },
     };
-  });
+
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {
+        argb: COLORS.label,
+      },
+    };
+
+    cell.alignment = {
+      ...leftAlignment,
+    };
+
+    cell.border = {
+      ...borderStyle,
+    };
+  }
 };
 
 // STATUS STYLE
-
 export const applyStatusStyle = (
   worksheet,
   statusRow,
   totalDays
 ) => {
-  for (let col = 1; col <= totalDays; col++) {
-    const cellAddress = XLSX.utils.encode_cell({
-      r: statusRow,
-      c: col,
-    });
+  for (
+    let col = 2;
+    col <= totalDays + 1;
+    col++
+  ) {
+    const cell =
+      worksheet.getCell(
+        statusRow,
+        col
+      );
 
-    const cell = worksheet[cellAddress];
+    const status = cell.value;
+    const config = STATUS_COLORS[status];
 
-    if (!cell) continue;
-
-    const config = statusConfig[cell.v];
-
-    // Default style
     if (!config) {
-      cell.s = {
-        font: {
-          bold: true,
-          color: {
-            rgb: "000000",
-          },
-          sz: 10,
+      cell.font = {
+        bold: true,
+        size: 10,
+        color: {
+          argb: COLORS.black,
         },
+      };
 
-        fill: {
-          patternType: "solid",
-          fgColor: {
-            rgb: "FFFFFF",
-          },
-        },
+      cell.alignment = {
+        ...centerAlignment,
+      };
 
-        alignment: centerAlignment,
-
-        border: borderStyle,
+      cell.border = {
+        ...borderStyle,
       };
 
       continue;
     }
 
-    cell.s = {
-      font: {
-        bold: true,
-        color: {
-          rgb: config.font,
-        },
-        sz: 10,
+    cell.font = {
+      bold: true,
+      size: 10,
+      color: {
+        argb: config.font,
       },
-
-      fill: {
-        patternType: "solid",
-        fgColor: {
-          rgb: config.background,
-        },
-      },
-
-      alignment: centerAlignment,
-
-      border: borderStyle,
     };
+
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {
+        argb: config.background,
+      },
+    };
+
+    cell.alignment = {
+      ...centerAlignment,
+    };
+
+    cell.border = {
+      ...borderStyle,
+    };
+  }
+};
+
+// ALL CELL BORDER
+export const applyAllBorders = (
+  worksheet
+) => {
+  worksheet.eachRow((row) => {
+    row.eachCell((cell) => {
+      cell.border = {
+        ...borderStyle,
+        ...cell.border,
+      };
+    });
+  });
+};
+
+// COLUMN WIDTH
+export const applyColumnWidths = (
+  worksheet,
+  totalColumns
+) => {
+  worksheet.getColumn(1).width = 25;
+
+  for (
+    let col = 2;
+    col <= totalColumns;
+    col++
+  ) {
+    worksheet.getColumn(col).width = 12;
+  }
+};
+
+// ROW HEIGHT
+export const applyRowHeights = (
+  worksheet
+) => {
+  worksheet.getRow(1).height = 24;
+
+  for (
+    let row = 2;
+    row <= 4;
+    row++
+  ) {
+    worksheet.getRow(row).height = 22;
+  }
+
+  worksheet.getRow(5).height = 8;
+  worksheet.getRow(6).height = 22;
+  worksheet.getRow(7).height = 22;
+  worksheet.getRow(8).height = 8;
+
+  for (
+    let row = 9;
+    row <= 14;
+    row++
+  ) {
+    worksheet.getRow(row).height = 22;
+  }
+};
+
+// FREEZE & PAGE SETTINGS
+export const applyWorksheetSettings = (
+  worksheet
+) => {
+  // Freeze panes
+  worksheet.views = [
+    {
+      state: "frozen",
+      xSplit: 1,
+      ySplit: 9,
+    },
+  ];
+
+  // Page setup
+  worksheet.pageSetup = {
+    orientation: "landscape",
+    paperSize:
+      worksheet.PAPERSIZE_A4,
+    fitToPage: true,
+    fitToWidth: 1,
+    fitToHeight: 0,
+  };
+
+  // Page margins
+  worksheet.pageMargins = {
+    left: 0.25,
+    right: 0.25,
+    top: 0.5,
+    bottom: 0.5,
+    header: 0.2,
+    footer: 0.2,
+  };
+};
+
+// BORDER RANGE HELPER
+export const applyBorderToRange = (
+  worksheet,
+  startRow,
+  endRow,
+  startCol,
+  endCol
+) => {
+  for (
+    let row = startRow;
+    row <= endRow;
+    row++
+  ) {
+    for (
+      let col = startCol;
+      col <= endCol;
+      col++
+    ) {
+      worksheet.getCell(
+        row,
+        col
+      ).border = {
+        ...borderStyle,
+      };
+    }
   }
 };
