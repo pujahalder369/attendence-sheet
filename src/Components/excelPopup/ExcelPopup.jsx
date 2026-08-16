@@ -23,14 +23,12 @@ const ExcelPopup = ({ closePopup }) => {
       });
   }, []);
 
-  // SELECT EMPLOYEE
   const handleCheckboxChange = (id) => {
     setSelectedEmployees((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
-  // SELECT ALL
   const handleSelectAll = (checked) => {
     if (checked) {
       const allEmployeeIds = attendanceData.results
@@ -43,7 +41,6 @@ const ExcelPopup = ({ closePopup }) => {
     }
   };
 
-  // DOWNLOAD EXCEL
   const handleDownload = async () => {
     const selectedData = attendanceData.results.filter((entry) =>
       selectedEmployees.includes(entry?.employee?.id),
@@ -55,9 +52,7 @@ const ExcelPopup = ({ closePopup }) => {
     }
 
     setIsGenerating(true);
-
     const loading = toast.loading("Generating Excel...");
-
     try {
       downloadOnlyExcel(selectedData);
 
@@ -66,9 +61,7 @@ const ExcelPopup = ({ closePopup }) => {
       toast.success("Excel downloaded successfully!");
     } catch (error) {
       console.error(error);
-
       toast.dismiss(loading);
-
       toast.error("Failed to generate Excel.");
     } finally {
       setIsGenerating(false);
@@ -82,7 +75,6 @@ const ExcelPopup = ({ closePopup }) => {
       <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
         <div className="bg-white p-6 rounded-lg w-[500px]">
           <div className="mb-5 grid grid-cols-2 gap-4">
-            {/* EMPLOYEES */}
 
             <div>
               <h2 className="font-semibold text-lg mb-3">Employees</h2>
@@ -90,7 +82,6 @@ const ExcelPopup = ({ closePopup }) => {
               <div className="left_box flex flex-col gap-2">
                 {attendanceData.results.map((entry) => {
                   const emp = entry?.employee;
-
                   const employeeId = emp?.id;
 
                   return (
@@ -127,7 +118,6 @@ const ExcelPopup = ({ closePopup }) => {
                     onChange={(e) => handleSelectAll(e.target.checked)}
                     className="w-4 h-4"
                   />
-
                   <span>Select All</span>
                 </label>
               </div>
@@ -135,11 +125,9 @@ const ExcelPopup = ({ closePopup }) => {
 
             <div>
               <h2 className="font-semibold text-lg mb-3">Export In</h2>
-
               <div className="left_box">
                 <label className="flex items-center gap-2">
                   <input type="radio" checked readOnly className="h-4 w-4" />
-
                   <span>Excel</span>
                 </label>
               </div>

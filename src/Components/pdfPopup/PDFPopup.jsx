@@ -32,14 +32,12 @@ const PDFPopup = ({ closePopup }) => {
     dataFetch();
   }, []);
 
-  // SELECT EMPLOYEE
   const handleCheckboxChange = (id) => {
     setSelectedEmployees((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
-  // PDF
   const downloadPDF = async (selectedData) => {
     const blob = await pdf(
       <AttendancePDF data={selectedData} selectedIds={selectedEmployees} />,
@@ -48,7 +46,6 @@ const PDFPopup = ({ closePopup }) => {
     saveAs(blob, "attendance-report.pdf");
   };
 
-  // MAIN DOWNLOAD
   const handleDownload = async () => {
     const selectedData = attendanceData.results.filter((entry) =>
       selectedEmployees.includes(entry?.employee?.id),
@@ -109,7 +106,6 @@ const PDFPopup = ({ closePopup }) => {
       <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
         <div className="bg-white p-6 rounded-lg w-[500px]">
           <div className="mb-5 grid grid-cols-2 gap-4">
-            {/* EMPLOYEES */}
             <div>
               <h2 className="font-semibold text-lg mb-3">Employees</h2>
 
@@ -159,12 +155,10 @@ const PDFPopup = ({ closePopup }) => {
               </div>
             </div>
 
-            {/* EXPORT TYPE */}
             <div>
               <h2 className="font-semibold text-lg mb-3">Export In</h2>
 
               <div className="left_box flex flex-col gap-3">
-                {/* PDF */}
                 <label
                   htmlFor="pdf"
                   className="flex items-center gap-2 cursor-pointer"
@@ -182,7 +176,6 @@ const PDFPopup = ({ closePopup }) => {
                   <span>PDF</span>
                 </label>
 
-                {/* EXCEL */}
                 <label
                   htmlFor="excel"
                   className="flex items-center gap-2 cursor-pointer"
@@ -203,7 +196,6 @@ const PDFPopup = ({ closePopup }) => {
             </div>
           </div>
 
-          {/* BUTTONS */}
           <div className="flex flex-col justify-center items-center gap-3">
             <button
               onClick={handleDownload}

@@ -14,7 +14,6 @@ export const COLORS = {
   weekOff: "FFD9D9D9",
 };
 
-// BORDER
 export const borderStyle = {
   top: {
     style: "thin",
@@ -45,14 +44,12 @@ export const borderStyle = {
   },
 };
 
-// CENTER ALIGNMENT
 export const centerAlignment = {
   horizontal: "center",
   vertical: "middle",
   wrapText: true,
 };
 
-// GENERAL STYLE
 export const applyGeneralStyle = (worksheet, totalRows, totalColumns) => {
   for (let row = 1; row <= totalRows; row++) {
     for (let col = 1; col <= totalColumns; col++) {
@@ -77,7 +74,6 @@ export const applyGeneralStyle = (worksheet, totalRows, totalColumns) => {
   }
 };
 
-// HEADER STYLE
 export const applyHeaderStyle = (worksheet, totalColumns) => {
   for (let col = 1; col <= totalColumns; col++) {
     const cell = worksheet.getCell(1, col);
@@ -109,7 +105,6 @@ export const applyHeaderStyle = (worksheet, totalColumns) => {
   }
 };
 
-// EMPLOYEE STYLE
 export const applyEmployeeStyle = (worksheet, totalRows) => {
   for (let row = 2; row <= totalRows; row++) {
     for (let col = 1; col <= 4; col++) {
@@ -147,7 +142,6 @@ export const applyEmployeeStyle = (worksheet, totalRows) => {
   }
 };
 
-// SUMMARY STYLE
 export const applySummaryStyle = (worksheet, totalRows) => {
   const summaryColors = {
     5: COLORS.present,
@@ -190,7 +184,6 @@ export const applySummaryStyle = (worksheet, totalRows) => {
   }
 };
 
-// DAY STYLE
 export const applyDayStyle = (worksheet, totalRows) => {
   for (let row = 2; row <= totalRows; row++) {
     for (let col = 11; col <= 41; col++) {
@@ -224,7 +217,6 @@ export const applyDayStyle = (worksheet, totalRows) => {
   }
 };
 
-// STATUS STYLE
 export const applyStatusStyle = (worksheet, totalRows) => {
   const statusColors = {
     P: {
@@ -292,7 +284,6 @@ export const applyStatusStyle = (worksheet, totalRows) => {
   }
 };
 
-// COLUMN WIDTH
 export const applyColumnWidth = (worksheet, header) => {
   for (let col = 1; col <= header.length; col++) {
     let width;
@@ -320,7 +311,6 @@ export const applyColumnWidth = (worksheet, header) => {
   }
 };
 
-// ROW HEIGHT
 export const applyRowHeight = (worksheet, totalRows) => {
   worksheet.getRow(1).height = 32;
   for (let row = 2; row <= totalRows; row++) {
@@ -328,7 +318,6 @@ export const applyRowHeight = (worksheet, totalRows) => {
   }
 };
 
-// WORKSHEET SETTINGS
 export const applyWorksheetSettings = (worksheet) => {
   worksheet.pageSetup = {
     orientation: "landscape",

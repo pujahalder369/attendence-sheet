@@ -20,23 +20,19 @@ import {
 const TOTAL_DAYS = 31;
 const TOTAL_COLUMNS = TOTAL_DAYS + 1;
 
-// GET EMPLOYEE NAME
 const getEmployeeName = (
   employee
 ) => {
   const firstName =
     employee?.first_name?.trim() || "---";
-
   const lastName =
     employee?.last_name?.trim() || "---";
-
   return (
     `${firstName} ${lastName}`.trim() ||
     "---"
   );
 };
 
-// STATUS SUMMARY
 const getStatusSummary = (
   attendances
 ) => {
@@ -65,7 +61,6 @@ const getStatusSummary = (
   return summary;
 };
 
-// CREATE EMPLOYEE INFORMATION
 const addEmployeeInformation = (
   worksheet,
   employee
@@ -76,19 +71,15 @@ const addEmployeeInformation = (
   worksheet.mergeCells(
     "A1:AF1"
   );
-
   worksheet.mergeCells(
     "A2:AF2"
   );
-
   worksheet.mergeCells(
     "A3:AF3"
   );
-
   worksheet.mergeCells(
     "A4:AF4"
   );
-
   worksheet.getCell(1, 1).value =
     `EmpCode : ${
       employee?.id ?? "---"
@@ -110,16 +101,13 @@ const addEmployeeInformation = (
     }`;
 };
 
-// ADD SUMMARY
 const addSummary = (
   worksheet,
   employee,
   summary
 ) => {
   const name = getEmployeeName(employee);
-
   worksheet.addRow([]);
-
   worksheet.addRow([
     "EmpCode",
     "Name",
@@ -130,8 +118,6 @@ const addSummary = (
     "Holiday",
     "WeekOff",
   ]);
-
-  // Data
   worksheet.addRow([
     employee?.id ?? "---",
     name,
@@ -144,7 +130,6 @@ const addSummary = (
   ]);
 };
 
-// ADD ATTENDANCE DATA
 const addAttendanceData = (
   worksheet,
   attendances
@@ -163,7 +148,6 @@ const addAttendanceData = (
     ),
   ]);
 
-  // IN TIME
   worksheet.addRow([
     "IN Time",
     ...Array.from(
@@ -177,7 +161,6 @@ const addAttendanceData = (
     ),
   ]);
 
-  // OUT TIME
   worksheet.addRow([
     "OUT Time",
 
@@ -192,7 +175,6 @@ const addAttendanceData = (
     ),
   ]);
 
-  // WORKING
   worksheet.addRow([
     "Working",
     ...Array.from(
@@ -213,7 +195,6 @@ const addAttendanceData = (
     ),
   ]);
 
-  // OVERTIME
   worksheet.addRow([
     "O.Times",
 
@@ -234,7 +215,6 @@ const addAttendanceData = (
     ),
   ]);
 
-  // STATUS
   worksheet.addRow([
     "Status",
 
@@ -254,7 +234,6 @@ const addAttendanceData = (
   ]);
 };
 
-// APPLY ALL STYLES
 const applyStyles = (
   worksheet
 ) => {
@@ -271,49 +250,41 @@ const applyStyles = (
     8
   );
 
-  // Day header
   applyDayHeaderStyle(
     worksheet,
     TOTAL_COLUMNS
   );
 
-  // Label column
   applyLabelStyle(
     worksheet,
     9,
     14
   );
 
-  // Status colors
   applyStatusStyle(
     worksheet,
     14,
     TOTAL_DAYS
   );
 
-  // General borders
   applyAllBorders(
     worksheet
   );
 
-  // Column widths
   applyColumnWidths(
     worksheet,
     TOTAL_COLUMNS
   );
 
-  // Row heights
   applyRowHeights(
     worksheet
   );
 
-  // Freeze + page setup
   applyWorksheetSettings(
     worksheet
   );
 };
 
-// CREATE UNIQUE SHEET NAME
 const getUniqueSheetName = (
   workbook,
   employee,
@@ -353,7 +324,6 @@ const getUniqueSheetName = (
   return sheetName;
 };
 
-// CREATE EMPLOYEE SHEET
 const createEmployeeSheet = (
   workbook,
   empData,
@@ -403,8 +373,6 @@ const createEmployeeSheet = (
   );
 };
 
-// DOWNLOAD EXCEL
-
 export const downloadExcel = async (
   selectedData = []
 ) => {
@@ -426,7 +394,6 @@ export const downloadExcel = async (
     workbook.created = new Date();
     workbook.modified = new Date();
 
-    // Create employee sheets
     selectedData.forEach(
       (empData, index) => {
         createEmployeeSheet(
@@ -437,10 +404,7 @@ export const downloadExcel = async (
       }
     );
 
-    // Generate buffer
     const buffer = await workbook.xlsx.writeBuffer();
-
-    // Create Blob
     const blob = new Blob(
       [buffer],
       {
@@ -448,7 +412,6 @@ export const downloadExcel = async (
       }
     );
 
-    // Download
     saveAs(
       blob,
       "attendance-report.xlsx"

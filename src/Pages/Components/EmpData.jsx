@@ -3,11 +3,27 @@ const EmpData = ({ data }) => {
     return (
         <div>
             {data.results.map((emp) => {
-                const present = emp.attendances.filter((a) => !a.absent && !a.holiday && !a.week_off && !a.half_day && !a.leave).length;
-                const absent = emp.attendances.filter((a) => a.absent).length;
-                const holiday = emp.attendances.filter((a) => a.holiday).length;
-                const weekoff = emp.attendances.filter((a) => a.week_off).length;
-                const halfday = emp.attendances.filter((a) => a.half_day).length;
+                let present = 0;
+                let absent = 0;
+                let holiday = 0;
+                let weekoff = 0;
+                let halfday = 0;
+
+                emp.attendances.forEach((a) => {
+                    if (a.absent) {
+                        absent++;
+                    } else if (a.holiday) {
+                        holiday++;
+                    } else if (a.week_off) {
+                        weekoff++;
+                    } else if (a.half_day) {
+                        halfday++;
+                    } else if (a.leave) {
+                        // Leave → don't count as present
+                    } else {
+                        present++;
+                    }
+                });
 
                 return (
                     <div

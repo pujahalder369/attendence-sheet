@@ -12,10 +12,6 @@ export const styles = StyleSheet.create({
     marginBottom: 18,
   },
 
-  /* =========================
-     EMPLOYEE HEADER
-  ========================= */
-
   header: {
     borderWidth: 1,
     borderColor: "#000000",
@@ -44,10 +40,6 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#000000",
   },
-
-  /* =========================
-     SUMMARY
-  ========================= */
 
   summaryRow: {
     flexDirection: "row",
@@ -101,10 +93,6 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  /* =========================
-     TABLE
-  ========================= */
-
   table: {
     borderWidth: 1,
     borderColor: "#000000",
@@ -128,10 +116,6 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 0,
   },
 
-  /* =========================
-     LABEL COLUMN
-  ========================= */
-
   cellLabel: {
     width: 70,
     minWidth: 70,
@@ -147,10 +131,6 @@ export const styles = StyleSheet.create({
   headerLabelCell: {
     backgroundColor: "#E7E6E6",
   },
-
-  /* =========================
-     DAY CELLS
-  ========================= */
 
   dayHeaderCell: {
     width: 23,
@@ -180,10 +160,6 @@ export const styles = StyleSheet.create({
     borderRightWidth: 0,
   },
 
-  /* =========================
-     TEXT
-  ========================= */
-
   tableHeaderText: {
     fontSize: 7,
     fontWeight: "bold",
@@ -212,10 +188,6 @@ export const styles = StyleSheet.create({
     color: "#000000",
     textAlign: "center",
   },
-
-  /* =========================
-     STATUS COLORS
-  ========================= */
 
   statusPresent: { backgroundColor: "#C6EFCE" },
   statusAbsent: { backgroundColor: "#FFC7CE" },

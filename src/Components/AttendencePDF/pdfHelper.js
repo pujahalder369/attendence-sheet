@@ -13,15 +13,10 @@ export const formatDuration = (seconds = 0) => {
 
 export const getStatus = (attendance) => {
   if (!attendance) return "-";
-
   if (attendance.absent) return "A";
-
   if (attendance.leave) return "L";
-
   if (attendance.half_day) return "HD";
-
   if (attendance.holiday) return "HO";
-
   if (attendance.week_off) return "WO";
 
   return "P";
@@ -40,44 +35,30 @@ export const calculateSummary = (attendances = []) => {
 
   attendances.forEach((item) => {
     if (!item) return;
-
-    // Absent
     if (item.absent) {
       absent++;
       return;
     }
-
-    // Leave
     if (item.leave) {
       leave++;
       return;
     }
-
-    // Week Off
     if (item.week_off) {
       weekoff++;
       return;
     }
-
-    // Holiday
     if (item.holiday) {
       holiday++;
       return;
     }
-
-    // Half Day
     if (item.half_day) {
       halfday++;
       present++;
     } else {
-      // Present
       present++;
     }
 
-    // Working hours
     totalWorkingSeconds += Number(item.duration) || 0;
-
-    // Overtime
     totalOTSeconds += Number(item.ot) || 0;
   });
 

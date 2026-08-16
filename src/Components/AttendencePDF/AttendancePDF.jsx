@@ -7,7 +7,6 @@ import {
 } from "./pdfHelper";
 
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
-
 const reportRows = [
     {
         label: "IN Time",
@@ -64,8 +63,6 @@ const AttendancePDF = ({
                             wrap={false}
                         >
 
-                            {/* HEADER */}
-
                             <View style={styles.header}>
                                 <Text style={styles.headerText}>
                                     EmpCode : {emp?.employee?.id ?? "---"}
@@ -86,9 +83,7 @@ const AttendancePDF = ({
                                     {emp?.employee?.designation || "---"}
                                 </Text>
                             </View>
-
-                            {/* SUMMARY */}
-
+                    
                             <View style={styles.summaryRow}>
                                 {summaryItems.map(
                                     (item, summaryIndex) => (
@@ -133,8 +128,6 @@ const AttendancePDF = ({
                                 )}
                             </View>
 
-                            {/* TABLE HEADER */}
-
                             <View style={styles.table}>
                                 <View
                                     style={[
@@ -174,7 +167,6 @@ const AttendancePDF = ({
                                         </View>
                                     ))}
                                 </View>
-                                {/* TABLE BODY */}
 
                                 {reportRows.map((row, rowIndex) => (
                                     <View
@@ -185,14 +177,12 @@ const AttendancePDF = ({
                                             styles.tableRowLast,
                                         ]}
                                     >
-                                        {/* Row Label */}
                                         <View style={styles.cellLabel}>
                                             <Text style={styles.rowLabelText}>
                                                 {row.label}
                                             </Text>
                                         </View>
 
-                                        {/* 31 Days */}
                                         {days.map((day, dayIndex) => {
                                             const att =
                                                 emp?.attendances?.[dayIndex];

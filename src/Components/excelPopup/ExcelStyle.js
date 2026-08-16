@@ -11,7 +11,6 @@ export const COLORS = {
   black: "FF000000",
 };
 
-// STATUS COLORS
 export const STATUS_COLORS = {
   P: {
     background: "FFC6EFCE",
@@ -44,7 +43,6 @@ export const STATUS_COLORS = {
   },
 };
 
-// BORDER
 export const borderStyle = {
   top: {
     style: "thin",
@@ -75,7 +73,6 @@ export const borderStyle = {
   },
 };
 
-// ALIGNMENTS
 export const centerAlignment = {
   horizontal: "center",
   vertical: "middle",
@@ -88,7 +85,6 @@ export const leftAlignment = {
   wrapText: true,
 };
 
-// EMPLOYEE INFORMATION STYLE
 export const applyEmployeeInfoStyle = (
   worksheet,
   totalColumns
@@ -127,7 +123,6 @@ export const applyEmployeeInfoStyle = (
   }
 };
 
-// SUMMARY HEADER STYLE
 export const applySummaryHeaderStyle = (
   worksheet,
   totalColumns = 8
@@ -166,7 +161,6 @@ export const applySummaryHeaderStyle = (
   }
 };
 
-// SUMMARY DATA STYLE
 export const applySummaryDataStyle = (
   worksheet,
   totalColumns = 8
@@ -205,7 +199,6 @@ export const applySummaryDataStyle = (
   }
 };
 
-// DAY HEADER STYLE
 export const applyDayHeaderStyle = (
   worksheet,
   totalColumns
@@ -244,7 +237,6 @@ export const applyDayHeaderStyle = (
   }
 };
 
-// LABEL STYLE
 export const applyLabelStyle = (
   worksheet,
   startRow,
@@ -284,7 +276,6 @@ export const applyLabelStyle = (
   }
 };
 
-// STATUS STYLE
 export const applyStatusStyle = (
   worksheet,
   statusRow,
@@ -350,7 +341,6 @@ export const applyStatusStyle = (
   }
 };
 
-// ALL CELL BORDER
 export const applyAllBorders = (
   worksheet
 ) => {
@@ -364,7 +354,6 @@ export const applyAllBorders = (
   });
 };
 
-// COLUMN WIDTH
 export const applyColumnWidths = (
   worksheet,
   totalColumns
@@ -380,7 +369,6 @@ export const applyColumnWidths = (
   }
 };
 
-// ROW HEIGHT
 export const applyRowHeights = (
   worksheet
 ) => {
@@ -408,11 +396,9 @@ export const applyRowHeights = (
   }
 };
 
-// FREEZE & PAGE SETTINGS
 export const applyWorksheetSettings = (
   worksheet
 ) => {
-  // Freeze panes
   worksheet.views = [
     {
       state: "frozen",
@@ -421,7 +407,6 @@ export const applyWorksheetSettings = (
     },
   ];
 
-  // Page setup
   worksheet.pageSetup = {
     orientation: "landscape",
     paperSize:
@@ -431,7 +416,6 @@ export const applyWorksheetSettings = (
     fitToHeight: 0,
   };
 
-  // Page margins
   worksheet.pageMargins = {
     left: 0.25,
     right: 0.25,
@@ -442,7 +426,6 @@ export const applyWorksheetSettings = (
   };
 };
 
-// BORDER RANGE HELPER
 export const applyBorderToRange = (
   worksheet,
   startRow,
